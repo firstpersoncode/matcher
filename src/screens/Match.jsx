@@ -344,42 +344,47 @@ function MatchInfo() {
             </Text>
           </View>
         </View>
-        <View style={{marginTop: 64, marginBottom: 32, position: 'relative'}}>
-          <Divider style={{backgroundColor: theme.colors.secondary}} />
-          <IconButton
-            size={20}
-            icon="bullhorn"
-            style={{
-              backgroundColor: theme.colors.secondaryContainer,
-              position: 'absolute',
-              top: 0,
-              transform: [{translateY: -25}],
-              left: 16,
-            }}
-          />
-        </View>
-        <View style={{marginBottom: 16, padding: 16}}>
-          {match.announcements.map(announcement => (
-            <Card key={announcement._id} style={{marginBottom: 8}}>
-              <Card.Content>
-                <Text variant="titleMedium" style={{marginBottom: 16}}>
-                  {match.owner.name}
-                </Text>
-                <Hyperlink
-                  onPress={url => Linking.openURL(url)}
-                  linkStyle={{color: 'blue'}}>
-                  <Text variant="titleMedium">{announcement.text}</Text>
-                </Hyperlink>
-                <Text style={{textAlign: 'right', marginTop: 16}}>
-                  {format(
-                    new Date(announcement.updatedAt),
-                    'iiii, do MMMM yyyy',
-                  )}
-                </Text>
-              </Card.Content>
-            </Card>
-          ))}
-        </View>
+        {match.announcements.length > 0 && (
+          <>
+            <View
+              style={{marginTop: 64, marginBottom: 32, position: 'relative'}}>
+              <Divider style={{backgroundColor: theme.colors.secondary}} />
+              <IconButton
+                size={20}
+                icon="bullhorn"
+                style={{
+                  backgroundColor: theme.colors.secondaryContainer,
+                  position: 'absolute',
+                  top: 0,
+                  transform: [{translateY: -25}],
+                  left: 16,
+                }}
+              />
+            </View>
+            <View style={{marginBottom: 16, padding: 16}}>
+              {match.announcements.map(announcement => (
+                <Card key={announcement._id} style={{marginBottom: 8}}>
+                  <Card.Content>
+                    <Text variant="titleMedium" style={{marginBottom: 16}}>
+                      {match.owner.name}
+                    </Text>
+                    <Hyperlink
+                      onPress={url => Linking.openURL(url)}
+                      linkStyle={{color: 'blue'}}>
+                      <Text variant="titleMedium">{announcement.text}</Text>
+                    </Hyperlink>
+                    <Text style={{textAlign: 'right', marginTop: 16}}>
+                      {format(
+                        new Date(announcement.updatedAt),
+                        'iiii, do MMMM yyyy',
+                      )}
+                    </Text>
+                  </Card.Content>
+                </Card>
+              ))}
+            </View>
+          </>
+        )}
       </ScrollView>
     </>
   );
