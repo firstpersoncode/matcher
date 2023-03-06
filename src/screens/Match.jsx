@@ -253,140 +253,137 @@ function MatchInfo() {
   }
 
   return (
-    <>
-      <ScrollView style={{flex: 1}}>
+    <ScrollView style={{flex: 1, backgroundColor: theme.colors.background}}>
+      <View
+        style={{
+          padding: 16,
+          flexDirection: 'row',
+          justifyContent: 'flex-end',
+        }}>
+        {!isOwner && isParticipant && (
+          <Button
+            mode="elevated"
+            icon="arrow-left"
+            textColor="#FFF"
+            style={{backgroundColor: theme.colors.error}}
+            onPress={onLeaveMatch}>
+            Leave
+          </Button>
+        )}
+        {isOwner && (
+          <Button
+            mode="elevated"
+            icon="delete"
+            textColor="#FFF"
+            style={{backgroundColor: theme.colors.error}}
+            onPress={onDeleteMatch}>
+            Delete
+          </Button>
+        )}
+        {user && !user.match && maxJoined > 0 && (
+          <Button
+            mode="elevated"
+            icon="exit-run"
+            textColor="#FFF"
+            style={{backgroundColor: theme.colors.primary}}
+            onPress={openJoinMatch}>
+            Join
+          </Button>
+        )}
+      </View>
+      <Divider style={{marginBottom: 16}} />
+      <View style={{marginBottom: 32, padding: 16}}>
+        <Text
+          variant="headlineLarge"
+          style={{fontWeight: 'bold', marginBottom: 16}}>
+          {match.provider.name}
+        </Text>
+        <Text variant="bodyLarge">{match.provider.address}</Text>
+      </View>
+      <View style={{padding: 16}}>
         <View
           style={{
-            padding: 16,
+            padding: 4,
+            borderRadius: 10,
+            marginBottom: 16,
+            backgroundColor: theme.colors.secondaryContainer,
             flexDirection: 'row',
-            justifyContent: 'flex-end',
+            alignItems: 'center',
           }}>
-          {!isOwner && isParticipant && (
-            <Button
-              mode="elevated"
-              icon="arrow-left"
-              textColor="#FFF"
-              style={{backgroundColor: theme.colors.error}}
-              onPress={onLeaveMatch}>
-              Leave
-            </Button>
-          )}
-          {isOwner && (
-            <Button
-              mode="elevated"
-              icon="delete"
-              textColor="#FFF"
-              style={{backgroundColor: theme.colors.error}}
-              onPress={onDeleteMatch}>
-              Delete
-            </Button>
-          )}
-          {user && !user.match && maxJoined > 0 && (
-            <Button
-              mode="elevated"
-              icon="exit-run"
-              textColor="#FFF"
-              style={{backgroundColor: theme.colors.primary}}
-              onPress={openJoinMatch}>
-              Join
-            </Button>
-          )}
-        </View>
-        <Divider style={{marginBottom: 16}} />
-        <View style={{marginBottom: 32, padding: 16}}>
+          <IconButton icon="calendar-check" size={15} style={{padding: 0}} />
           <Text
-            variant="headlineLarge"
-            style={{fontWeight: 'bold', marginBottom: 16}}>
-            {match.provider.name}
+            variant="titleMedium"
+            style={{
+              flex: 1,
+              color: theme.colors.onPrimaryContainer,
+              fontWeight: 'bold',
+            }}>
+            {format(new Date(match.start), 'iiii, do MMMM yyyy')}
           </Text>
-          <Text variant="bodyLarge">{match.provider.address}</Text>
         </View>
-        <View style={{padding: 16}}>
-          <View
-            style={{
-              padding: 4,
-              borderRadius: 10,
-              marginBottom: 16,
-              backgroundColor: theme.colors.secondaryContainer,
-              flexDirection: 'row',
-              alignItems: 'center',
-            }}>
-            <IconButton icon="calendar-check" size={15} style={{padding: 0}} />
-            <Text
-              variant="titleMedium"
-              style={{
-                flex: 1,
-                color: theme.colors.onPrimaryContainer,
-                fontWeight: 'bold',
-              }}>
-              {format(new Date(match.start), 'iiii, do MMMM yyyy')}
-            </Text>
-          </View>
 
-          <View
+        <View
+          style={{
+            padding: 4,
+            borderRadius: 10,
+            backgroundColor: theme.colors.secondaryContainer,
+            flexDirection: 'row',
+            alignItems: 'center',
+          }}>
+          <IconButton icon="clock-outline" size={15} style={{padding: 0}} />
+          <Text
+            variant="titleMedium"
             style={{
-              padding: 4,
-              borderRadius: 10,
-              backgroundColor: theme.colors.secondaryContainer,
-              flexDirection: 'row',
-              alignItems: 'center',
+              flex: 1,
+              color: theme.colors.onPrimaryContainer,
+              fontWeight: 'bold',
             }}>
-            <IconButton icon="clock-outline" size={15} style={{padding: 0}} />
-            <Text
-              variant="titleMedium"
-              style={{
-                flex: 1,
-                color: theme.colors.onPrimaryContainer,
-                fontWeight: 'bold',
-              }}>
-              {format(new Date(match.start), 'HH:mm')} -{' '}
-              {format(new Date(match.end), 'HH:mm')}
-            </Text>
-          </View>
+            {format(new Date(match.start), 'HH:mm')} -{' '}
+            {format(new Date(match.end), 'HH:mm')}
+          </Text>
         </View>
-        {match.announcements.length > 0 && (
-          <>
-            <View
-              style={{marginTop: 64, marginBottom: 32, position: 'relative'}}>
-              <Divider style={{backgroundColor: theme.colors.secondary}} />
-              <IconButton
-                size={20}
-                icon="bullhorn"
-                style={{
-                  backgroundColor: theme.colors.secondaryContainer,
-                  position: 'absolute',
-                  top: 0,
-                  transform: [{translateY: -25}],
-                  left: 16,
-                }}
-              />
-            </View>
-            <View style={{marginBottom: 16, padding: 16}}>
-              {match.announcements.map(announcement => (
-                <Card key={announcement._id} style={{marginBottom: 8}}>
-                  <Card.Content>
-                    <Text variant="titleMedium" style={{marginBottom: 16}}>
-                      {match.owner.name}
-                    </Text>
-                    <Hyperlink
-                      onPress={url => Linking.openURL(url)}
-                      linkStyle={{color: 'blue'}}>
-                      <Text variant="titleMedium">{announcement.text}</Text>
-                    </Hyperlink>
-                    <Text style={{textAlign: 'right', marginTop: 16}}>
-                      {format(
-                        new Date(announcement.updatedAt),
-                        'iiii, do MMMM yyyy',
-                      )}
-                    </Text>
-                  </Card.Content>
-                </Card>
-              ))}
-            </View>
-          </>
-        )}
-      </ScrollView>
-    </>
+      </View>
+      {match.announcements.length > 0 && (
+        <>
+          <View style={{marginTop: 64, marginBottom: 32, position: 'relative'}}>
+            <Divider style={{backgroundColor: theme.colors.secondary}} />
+            <IconButton
+              size={20}
+              icon="bullhorn"
+              style={{
+                backgroundColor: theme.colors.secondaryContainer,
+                position: 'absolute',
+                top: 0,
+                transform: [{translateY: -25}],
+                left: 16,
+              }}
+            />
+          </View>
+          <View style={{marginBottom: 16, padding: 16}}>
+            {match.announcements.map(announcement => (
+              <Card key={announcement._id} style={{marginBottom: 8}}>
+                <Card.Content>
+                  <Text variant="titleMedium" style={{marginBottom: 16}}>
+                    {match.owner.name}
+                  </Text>
+                  <Hyperlink
+                    onPress={url => Linking.openURL(url)}
+                    linkStyle={{color: 'blue'}}>
+                    <Text variant="titleMedium">{announcement.text}</Text>
+                  </Hyperlink>
+                  <Text style={{textAlign: 'right', marginTop: 16}}>
+                    {format(
+                      new Date(announcement.updatedAt),
+                      'iiii, do MMMM yyyy',
+                    )}
+                  </Text>
+                </Card.Content>
+              </Card>
+            ))}
+          </View>
+        </>
+      )}
+    </ScrollView>
   );
 }
 
@@ -428,6 +425,7 @@ function MatchJoin({maxJoined, onSubmit}) {
 
 function MatchParticipant() {
   const {matches} = useAppContext();
+  const theme = useTheme();
   const route = useRoute();
   const match = useMemo(
     () => matches.find(m => String(m._id) === String(route.params.matchRef)),
@@ -435,7 +433,7 @@ function MatchParticipant() {
   );
 
   return (
-    <ScrollView style={{padding: 16}}>
+    <ScrollView style={{padding: 16, backgroundColor: theme.colors.background}}>
       {match.participants.map(({participant, count}) => (
         <Participant
           key={participant._id}

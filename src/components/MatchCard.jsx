@@ -85,7 +85,7 @@ export default function MatchCard({match, onPress}) {
           title={match.provider.name}
           description={match.provider.address}
           center={match.location.coordinates.slice().reverse()}
-          height={450}
+          height={300}
           liteMode={false}
         />
       )}

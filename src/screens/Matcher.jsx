@@ -63,7 +63,7 @@ export default function Matcher() {
   }
 
   return (
-    <>
+    <View style={{backgroundColor: theme.colors.background}}>
       <FlatList
         refreshControl={
           <RefreshControl refreshing={isRefreshing} onRefresh={onRefresh} />
@@ -90,7 +90,7 @@ export default function Matcher() {
           onPress={openMatchCreator}
         />
       )}
-    </>
+    </View>
   );
 }
 

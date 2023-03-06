@@ -54,10 +54,9 @@ export default function Header({back, navigation, route, options}) {
 
   return (
     <>
-      <Appbar.Header style={{backgroundColor: theme.colors.secondary}}>
-        {back && <Appbar.BackAction color="#fff" onPress={navigation.goBack} />}
+      <Appbar.Header style={{backgroundColor: theme.colors.background}}>
+        {back && <Appbar.BackAction onPress={navigation.goBack} />}
         <Appbar.Content
-          color="#fff"
           title={route.params?.name || options?.title || route.name}
         />
         <Menu
@@ -66,7 +65,6 @@ export default function Header({back, navigation, route, options}) {
           anchor={
             <View style={{position: 'relative'}}>
               <Appbar.Action
-                color="#fff"
                 icon="account-circle"
                 onPress={toggleVisibleMenu}
               />
