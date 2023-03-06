@@ -1,5 +1,7 @@
+import {useState} from 'react';
 import {View} from 'react-native';
 import {
+  Button,
   Card,
   Chip,
   Divider,
@@ -14,39 +16,39 @@ import Map from './Map';
 
 export default function ProviderCard({provider, onPress}) {
   const theme = useTheme();
+  const [visibleMap, setVisibleMap] = useState(false);
+
+  function toggleVisibleMap() {
+    setVisibleMap(v => !v);
+  }
 
   return (
     <Card style={{margin: 16}}>
       <TouchableRipple onPress={onPress}>
-        <Card.Content
-          style={{
-            padding: 16,
-            backgroundColor: theme.colors.primary,
-            borderTopLeftRadius: 10,
-            borderTopRightRadius: 10,
-          }}>
+        <Card.Content style={{padding: 16}}>
           <View style={{flexDirection: 'row', justifyContent: 'flex-end'}}>
-            <Chip icon="map-marker">
+            <Button
+              mode="contained"
+              icon="map-marker"
+              onPress={toggleVisibleMap}>
               ~ {Math.floor(provider.distance / 1000)} km
-            </Chip>
+            </Button>
           </View>
 
-          <Text style={{color: '#fff'}} variant="titleLarge">
-            {provider.name}
-          </Text>
-          <Text style={{color: '#fff'}} variant="bodyMedium">
-            {provider.address}
-          </Text>
+          <Text variant="titleLarge">{provider.name}</Text>
+          <Text variant="bodyMedium">{provider.address}</Text>
         </Card.Content>
       </TouchableRipple>
+      {visibleMap && (
+        <Map
+          title={provider.name}
+          description={provider.address}
+          center={provider.location.coordinates.slice().reverse()}
+          height={300}
+          liteMode={false}
+        />
+      )}
       <Divider />
-      <Map
-        title={provider.name}
-        description={provider.address}
-        center={provider.location.coordinates.slice().reverse()}
-        height={200}
-        liteMode={false}
-      />
       <TouchableRipple onPress={onPress}>
         <Card.Content style={{padding: 16}}>
           {provider.availabilities.map(availability => (
