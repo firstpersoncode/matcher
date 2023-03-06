@@ -15,7 +15,7 @@ import {
 
 const hours = [...Array(24).keys()];
 const hourInMinutes = 60;
-const minLeft = 25;
+const minLeft = 30;
 const slotHeight = 30;
 
 export default function SlotPicker({
@@ -187,12 +187,13 @@ export default function SlotPicker({
                   opacity: isDisabled ? 0.3 : 1,
                 }}>
                 <Text
+                  variant="labelSmall"
                   style={{
                     width: minLeft,
                     borderTopWidth: 0.3,
                     borderRightWidth: 0.3,
                     borderColor: '#ccc',
-                    fontSize: 8,
+                    fontSize: 10,
                   }}>
                   {slotString}
                 </Text>
@@ -287,26 +288,50 @@ export default function SlotPicker({
             {selectedSlots.length > 1 ? (
               <>
                 {i === 0 && (
-                  <Text style={{color: '#FFF', marginRight: 8}}>
-                    {format(slot.start, 'HH:mm')} - Tap to delete - Tap and Hold
-                    to clear
-                  </Text>
+                  <>
+                    <Text style={{color: '#FFF'}}>
+                      {format(slot.start, 'HH:mm')}
+                    </Text>
+                    <Text
+                      style={{marginLeft: 8, color: 'rgba(255,255,255,0.3)'}}>
+                      - Tap to delete{'   '}- Tap and Hold to clear
+                    </Text>
+                  </>
                 )}
                 {i === selectedSlots.length - 1 && (
-                  <Text style={{color: '#FFF'}}>
-                    {format(slot.end, 'HH:mm')}
-                    {'  '}(
-                    {differenceInMinutes(slot.end, selectedSlots[0].start)}{' '}
-                    minutes)
-                  </Text>
+                  <>
+                    <Text style={{color: '#FFF'}}>
+                      {format(slot.end, 'HH:mm')}
+                    </Text>
+                    <Text
+                      style={{
+                        marginLeft: 8,
+                        color: '#FFF',
+                        fontWeight: 'bold',
+                      }}>
+                      ({differenceInMinutes(slot.end, selectedSlots[0].start)}{' '}
+                      minutes)
+                    </Text>
+                  </>
                 )}
               </>
             ) : (
               <>
-                <Text style={{color: '#FFF', marginRight: 8}}>
+                <Text style={{color: '#FFF'}}>
                   {format(slot.start, 'HH:mm')} - {format(slot.end, 'HH:mm')}
                 </Text>
-                <Text style={{color: '#FFF'}}> - Tap to delete</Text>
+                <Text style={{marginLeft: 8, color: 'rgba(255,255,255,0.3)'}}>
+                  - Tap to delete
+                </Text>
+                <Text
+                  style={{
+                    marginLeft: 8,
+                    color: '#FFF',
+                    fontWeight: 'bold',
+                  }}>
+                  ({differenceInMinutes(slot.end, selectedSlots[0].start)}{' '}
+                  minutes)
+                </Text>
               </>
             )}
           </Pressable>
