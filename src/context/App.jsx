@@ -1,7 +1,7 @@
 import {useState, createContext, useContext, useEffect} from 'react';
 import Geolocation from '@react-native-community/geolocation';
 import io from 'socket.io-client';
-import {API_URI} from '@env';
+import Config from 'react-native-config';
 
 import {
   fetchUser,
@@ -59,7 +59,7 @@ function useAppState() {
         console.error('requestAuthorization', err.message || err),
       );
 
-      socketClient = io(API_URI);
+      socketClient = io(Config.API_URI);
       socketClient.on('connect', socketInit);
       socketClient.on('connect_error', socketError);
 

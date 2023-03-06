@@ -1,4 +1,5 @@
 #import "AppDelegate.h"
+#import "RNCConfig.h"
 
 #import <React/RCTBundleURLProvider.h>
 #import <GoogleMaps/GoogleMaps.h>
@@ -31,7 +32,8 @@
 /// @return: `true` if the `concurrentRoot` feature is enabled. Otherwise, it returns `false`.
 - (BOOL)concurrentRootEnabled
 {
-  [GMSServices provideAPIKey:@"AIzaSyDAgOttlznrsn5iWfOIWpPwzjbc_PJig5I"]; // add this line using the api key obtained from Google Console
+  NSString *gmapApiKey = [RNCConfig envFor:@"GMAPS_API_KEY"];
+  [GMSServices provideAPIKey:gmapApiKey]; // add this line using the api key obtained from Google Console
   return true;
 }
 

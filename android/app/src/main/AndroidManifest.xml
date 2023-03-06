@@ -28,6 +28,6 @@
       </activity>
        <meta-data
         android:name="com.google.android.geo.API_KEY"
-        android:value="AIzaSyDAgOttlznrsn5iWfOIWpPwzjbc_PJig5I"/>
+        android:value="@string/GMAPS_API_KEY"/>
     </application>
 </manifest>

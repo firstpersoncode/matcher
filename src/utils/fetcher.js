@@ -1,6 +1,6 @@
 import axios from 'axios';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import {API_URI} from '@env';
+import Config from 'react-native-config';
 
 async function fetcherGet(url, token) {
   return axios.get(url, {
@@ -31,12 +31,12 @@ export default async function fetcher(endpoint, options) {
 
   switch (options.method) {
     case 'GET':
-      return fetcherGet(`${API_URI}${endpoint}`, token);
+      return fetcherGet(`${Config.API_URI}${endpoint}`, token);
     case 'POST':
-      return fetcherPost(`${API_URI}${endpoint}`, options.data, token);
+      return fetcherPost(`${Config.API_URI}${endpoint}`, options.data, token);
     case 'PUT':
-      return fetcherPut(`${API_URI}${endpoint}`, options.data, token);
+      return fetcherPut(`${Config.API_URI}${endpoint}`, options.data, token);
     case 'DELETE':
-      return fetcherDelete(`${API_URI}${endpoint}`, token);
+      return fetcherDelete(`${Config.API_URI}${endpoint}`, token);
   }
 }
