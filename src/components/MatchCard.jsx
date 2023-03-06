@@ -53,22 +53,29 @@ export default function MatchCard({match, onPress}) {
           <View
             style={{
               padding: 16,
-              backgroundColor: theme.colors.primary,
+              backgroundColor: isParticipant
+                ? theme.colors.inversePrimary
+                : theme.colors.secondaryContainer,
               borderTopLeftRadius: 10,
               borderTopRightRadius: 10,
             }}>
             <View style={{flexDirection: 'row', justifyContent: 'flex-end'}}>
-              <Chip icon="account" style={{marginRight: 8}}>
+              <Chip
+                icon="account"
+                style={{marginRight: 8, backgroundColor: '#FFF'}}>
                 {joinedCount} / {match.count}
               </Chip>
 
-              <Chip icon="map-marker">
+              <Chip icon="map-marker" style={{backgroundColor: '#FFF'}}>
                 ~ {Math.floor(match.distance / 1000)} km
               </Chip>
             </View>
 
             <Text
-              style={{color: '#FFF', fontWeight: 'bold'}}
+              style={{
+                color: theme.colors.onSecondaryContainer,
+                fontWeight: 'bold',
+              }}
               variant="titleLarge">
               {match.name}
             </Text>
