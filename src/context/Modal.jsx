@@ -1,4 +1,6 @@
 import {createContext, useContext, useState} from 'react';
+import {View} from 'react-native';
+import {Divider, IconButton, Modal} from 'react-native-paper';
 
 const modalContext = {
   visible: false,
@@ -35,6 +37,20 @@ export default function ModalContextProvider({children}) {
   return (
     <ModalContext.Provider value={modalContext}>
       {children}
+      <Modal
+        style={{margin: 16, zIndex: 10000}}
+        visible={modalContext.visible}
+        onDismiss={modalContext.hideModal}>
+        <View
+          style={{
+            backgroundColor: '#fff',
+            alignItems: 'flex-end',
+          }}>
+          <IconButton icon="close" onPress={modalContext.hideModal} />
+        </View>
+        <Divider />
+        {modalContext.content}
+      </Modal>
     </ModalContext.Provider>
   );
 }
