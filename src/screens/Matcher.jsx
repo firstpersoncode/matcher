@@ -1,4 +1,4 @@
-import {useMemo, useState} from 'react';
+import {useEffect, useMemo, useState} from 'react';
 import {FlatList, RefreshControl, View} from 'react-native';
 import {FAB, useTheme} from 'react-native-paper';
 import {useNavigation} from '@react-navigation/native';
@@ -19,6 +19,14 @@ export default function Matcher() {
     return matches.filter(m => String(m._id) !== String(user.match._id));
   }, [user?.match, matches]);
 
+  useEffect(() => {
+    if (user?.match?._id)
+      navigation.navigate('Match', {
+        name: user.match.name,
+        matchRef: user.match._id,
+      });
+  }, [user?.match?._id, user?.match?.name]);
+
   async function onRefresh() {
     setIsRefreshing(true);
     await init();
@@ -36,7 +44,11 @@ export default function Matcher() {
   }
 
   return (
-    <View style={{backgroundColor: theme.colors.background}}>
+    <View
+      style={{
+        backgroundColor: theme.colors.background,
+        paddingBottom: user?.match ? 150 : 0,
+      }}>
       {user?.match && (
         <MatchCard match={user.match} onPress={selectMatch(user.match)} />
       )}
