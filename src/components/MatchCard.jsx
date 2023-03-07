@@ -57,27 +57,44 @@ export default function MatchCard({match, onPress}) {
               {totalUnreads}
             </Badge>
           )}
-          <View style={{flexDirection: 'row', justifyContent: 'flex-end'}}>
-            <Chip icon="account" style={{marginRight: 8}}>
-              {joinedCount} / {match.count}
-            </Chip>
-
-            <Button
-              mode="contained"
-              icon="map-marker"
-              onPress={toggleVisibleMap}>
-              ~ {Math.floor(match.distance / 1000)} km
-            </Button>
-          </View>
-
-          <Text
+          <View
             style={{
-              color: theme.colors.onSecondaryContainer,
-              fontWeight: 'bold',
-            }}
-            variant="titleLarge">
-            {match.name}
-          </Text>
+              flexDirection: 'row',
+              justifyContent: 'space-between',
+              marginBottom: 8,
+            }}>
+            <View style={{flex: 1, paddingRight: 16}}>
+              <Text
+                style={{
+                  color: theme.colors.onSecondaryContainer,
+                  fontWeight: 'bold',
+                  marginBottom: 8,
+                }}
+                variant="titleLarge">
+                {match.name}
+              </Text>
+
+              <Text variant="titleMedium">{match.provider.name}</Text>
+              <Text variant="bodyMedium">{match.provider.address}</Text>
+            </View>
+
+            <View>
+              <Button
+                mode="contained"
+                icon="map-marker"
+                style={{width: 100, marginBottom: 8}}
+                onPress={toggleVisibleMap}>
+                ~ {Math.floor(match.distance / 1000)} km
+              </Button>
+
+              <Button
+                style={{width: 100}}
+                mode="contained-tonal"
+                icon="account">
+                {joinedCount} / {match.count}
+              </Button>
+            </View>
+          </View>
         </Card.Content>
       </TouchableRipple>
       {visibleMap && (
@@ -92,11 +109,6 @@ export default function MatchCard({match, onPress}) {
       <Divider />
       <TouchableRipple onPress={onPress}>
         <Card.Content style={{padding: 16}}>
-          <View style={{marginBottom: 16}}>
-            <Text variant="titleMedium">{match.provider.name}</Text>
-            <Text variant="bodyMedium">{match.provider.address}</Text>
-          </View>
-
           <View
             style={{
               padding: 4,
