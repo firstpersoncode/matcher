@@ -2,28 +2,28 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import fetcher from 'src/utils/fetcher';
 
 export async function fetchMessages() {
-  const {data} = await fetcher('/participant/message/list', {
+  const {data} = await fetcher('/api/v1/message/list', {
     method: 'GET',
   });
   return data;
 }
 
 export async function postMessage(message) {
-  await fetcher('/participant/message/post', {
+  await fetcher('/api/v1/message/post', {
     method: 'POST',
     data: message,
   });
 }
 
 export async function announce(message) {
-  await fetcher('/participant/message/announce', {
+  await fetcher('/api/v1/message/announce', {
     method: 'PUT',
     data: message,
   });
 }
 
 export async function unannounce(message) {
-  await fetcher('/participant/message/unannounce', {
+  await fetcher('/api/v1/message/unannounce', {
     method: 'PUT',
     data: message,
   });
