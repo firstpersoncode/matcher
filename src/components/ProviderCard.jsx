@@ -23,20 +23,31 @@ export default function ProviderCard({provider, onPress}) {
   }
 
   return (
-    <Card style={{margin: 16}}>
+    <Card style={{margin: 16, backgroundColor: '#FFF'}}>
       <TouchableRipple onPress={onPress}>
         <Card.Content style={{padding: 16}}>
-          <View style={{flexDirection: 'row', justifyContent: 'flex-end'}}>
+          <View
+            style={{
+              flexDirection: 'row',
+              justifyContent: 'space-between',
+              alignItems: 'flex-start',
+            }}>
+            <View style={{flex: 1, paddingRight: 16}}>
+              <Text
+                style={{fontWeight: 'bold', marginBottom: 8}}
+                variant="titleLarge">
+                {provider.name}
+              </Text>
+              <Text variant="bodyMedium">{provider.address}</Text>
+            </View>
             <Button
               mode="contained"
               icon="map-marker"
+              style={{width: 150}}
               onPress={toggleVisibleMap}>
               ~ {Math.floor(provider.distance / 1000)} km
             </Button>
           </View>
-
-          <Text variant="titleLarge">{provider.name}</Text>
-          <Text variant="bodyMedium">{provider.address}</Text>
         </Card.Content>
       </TouchableRipple>
       {visibleMap && (
@@ -51,20 +62,31 @@ export default function ProviderCard({provider, onPress}) {
       <Divider />
       <TouchableRipple onPress={onPress}>
         <Card.Content style={{padding: 16}}>
-          {provider.availabilities.map(availability => (
-            <View
-              key={availability.day}
-              style={{
-                flexDirection: 'row',
-                justifyContent: 'space-between',
-                width: '60%',
-              }}>
-              <Text variant="bodyMedium">{DAY_MAPS[availability.day]}</Text>
-              <Text variant="bodyMedium">
-                {availability.start} - {availability.end}
-              </Text>
-            </View>
-          ))}
+          <View
+            style={{
+              padding: 16,
+              borderRadius: 10,
+              backgroundColor: theme.colors.secondaryContainer,
+            }}>
+            {provider.availabilities.map(availability => (
+              <View
+                key={availability.day}
+                style={{
+                  flexDirection: 'row',
+                  justifyContent: 'space-between',
+                  width: '60%',
+                  marginTop: 4,
+                  marginBottom: 4,
+                }}>
+                <Text variant="labelMedium" style={{fontWeight: 'bold'}}>
+                  {DAY_MAPS[availability.day]}
+                </Text>
+                <Text variant="labelMedium">
+                  {availability.start} - {availability.end}
+                </Text>
+              </View>
+            ))}
+          </View>
         </Card.Content>
       </TouchableRipple>
     </Card>

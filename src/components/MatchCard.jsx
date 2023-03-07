@@ -4,7 +4,6 @@ import {
   Card,
   Text,
   TouchableRipple,
-  Chip,
   useTheme,
   IconButton,
   Badge,
@@ -73,22 +72,25 @@ export default function MatchCard({match, onPress}) {
                 variant="titleLarge">
                 {match.name}
               </Text>
-
               <Text variant="titleMedium">{match.provider.name}</Text>
-              <Text variant="bodyMedium">{match.provider.address}</Text>
+              {!isParticipant && (
+                <Text variant="bodyMedium">{match.provider.address}</Text>
+              )}
             </View>
 
             <View>
-              <Button
-                mode="contained"
-                icon="map-marker"
-                style={{width: 100, marginBottom: 8}}
-                onPress={toggleVisibleMap}>
-                ~ {Math.floor(match.distance / 1000)} km
-              </Button>
+              {!isParticipant && (
+                <Button
+                  mode="contained"
+                  icon="map-marker"
+                  style={{width: 150, marginBottom: 8}}
+                  onPress={toggleVisibleMap}>
+                  ~ {Math.floor(match.distance / 1000)} km
+                </Button>
+              )}
 
               <Button
-                style={{width: 100}}
+                style={{width: 150}}
                 mode="contained-tonal"
                 icon="account">
                 {joinedCount} / {match.count}
@@ -107,30 +109,36 @@ export default function MatchCard({match, onPress}) {
         />
       )}
       <Divider />
-      <TouchableRipple onPress={onPress}>
-        <Card.Content style={{padding: 16}}>
-          <View
-            style={{
-              padding: 4,
-              borderRadius: 10,
-              backgroundColor: theme.colors.secondaryContainer,
-              flexDirection: 'row',
-              alignItems: 'center',
-            }}>
-            <IconButton icon="calendar-check" size={15} style={{padding: 0}} />
-            <Text
+      {!isParticipant && (
+        <TouchableRipple onPress={onPress}>
+          <Card.Content style={{padding: 16}}>
+            <View
               style={{
-                flex: 1,
-                color: theme.colors.onPrimaryContainer,
-                fontWeight: 'bold',
+                padding: 4,
+                borderRadius: 10,
+                backgroundColor: theme.colors.secondaryContainer,
+                flexDirection: 'row',
+                alignItems: 'center',
               }}>
-              {format(new Date(match.start), 'iiii | do MMM yyyy |')}{' '}
-              {format(new Date(match.start), 'HH:mm')} -{' '}
-              {format(new Date(match.end), 'HH:mm')}
-            </Text>
-          </View>
-        </Card.Content>
-      </TouchableRipple>
+              <IconButton
+                icon="calendar-check"
+                size={15}
+                style={{padding: 0}}
+              />
+              <Text
+                style={{
+                  flex: 1,
+                  color: theme.colors.onPrimaryContainer,
+                  fontWeight: 'bold',
+                }}>
+                {format(new Date(match.start), 'iiii | do MMM yyyy |')}{' '}
+                {format(new Date(match.start), 'HH:mm')} -{' '}
+                {format(new Date(match.end), 'HH:mm')}
+              </Text>
+            </View>
+          </Card.Content>
+        </TouchableRipple>
+      )}
     </Card>
   );
 }
