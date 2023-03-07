@@ -1,6 +1,7 @@
 import {NavigationContainer} from '@react-navigation/native';
 import {Provider as PaperProvider} from 'react-native-paper';
 import {SheetProvider} from 'react-native-actions-sheet';
+import {SafeAreaProvider} from 'react-native-safe-area-context';
 
 import AppContextProvider from './context/App';
 import ModalContextProvider from './context/Modal';
@@ -16,7 +17,9 @@ export default function App() {
           <ModalContextProvider>
             <SheetContextProvider>
               <SheetProvider>
-                <Screens />
+                <SafeAreaProvider>
+                  <Screens />
+                </SafeAreaProvider>
               </SheetProvider>
             </SheetContextProvider>
           </ModalContextProvider>

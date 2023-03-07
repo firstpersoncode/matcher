@@ -3,6 +3,7 @@ import ActionSheet, {
   registerSheet,
   SheetManager,
 } from 'react-native-actions-sheet';
+import {SafeAreaView} from 'react-native-safe-area-context';
 
 const SHEET_ID = 'global-sheet';
 
@@ -53,7 +54,7 @@ function Sheet({sheetId}) {
 
   return (
     <ActionSheet id={sheetId} containerStyle={{height}}>
-      {content}
+      <SafeAreaView>{content}</SafeAreaView>
     </ActionSheet>
   );
 }
