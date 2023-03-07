@@ -167,7 +167,7 @@ export default function FormScheduler({form, onChangeForm, setStep}) {
     <>
       <IconButton icon="arrow-left" onPress={onBack} />
       <Divider />
-      <ScrollView ref={scrollViewRef} style={{padding: 16}}>
+      <ScrollView ref={scrollViewRef} style={{padding: 16, marginBottom: 16}}>
         {form.provider.availabilities.map((a, i) => {
           const selected = a.day === availability?.day;
 
