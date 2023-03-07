@@ -55,6 +55,7 @@ export default function MatchChat() {
         keyExtractor={item => item._id}
       />
       <View
+        keyboardShouldPersistTaps="handled"
         style={{
           margin: 16,
           flexDirection: 'row',

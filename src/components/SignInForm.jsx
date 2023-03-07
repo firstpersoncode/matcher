@@ -1,4 +1,5 @@
 import {useState} from 'react';
+import {ScrollView} from 'react-native';
 import {Button, HelperText, TextInput, useTheme} from 'react-native-paper';
 
 import validateEmail from 'src/utils/validateEmail';
@@ -41,7 +42,7 @@ export default function SignInForm({onSubmit, onSignUp}) {
   }
 
   return (
-    <>
+    <ScrollView keyboardShouldPersistTaps="handled">
       <TextInput
         keyboardType="email-address"
         autoComplete="email"
@@ -78,6 +79,6 @@ export default function SignInForm({onSubmit, onSignUp}) {
       <Button disabled={isSubmitted} onPress={onSignUp}>
         Sign Up
       </Button>
-    </>
+    </ScrollView>
   );
 }

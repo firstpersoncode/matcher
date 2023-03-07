@@ -1,5 +1,5 @@
 import {useState} from 'react';
-import {View} from 'react-native';
+import {ScrollView, View} from 'react-native';
 import {TextInput, HelperText, Button} from 'react-native-paper';
 
 import Counter from './Counter';
@@ -49,7 +49,7 @@ export default function FormParticipant({form, onChangeForm, setStep}) {
   }
 
   return (
-    <View style={{padding: 16}}>
+    <ScrollView style={{padding: 16}} keyboardShouldPersistTaps="handled">
       <TextInput
         label="Name"
         mode="outlined"
@@ -80,6 +80,6 @@ export default function FormParticipant({form, onChangeForm, setStep}) {
       <Button mode="contained" onPress={handleSubmit}>
         Continue
       </Button>
-    </View>
+    </ScrollView>
   );
 }

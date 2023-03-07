@@ -94,6 +94,7 @@ function Participant({match, participant, count}) {
               }}>
               {count}
             </Chip>
+            {isUserOwner && <IconButton mode="contained" icon="pencil" />}
           </Card.Content>
         </Card>
       }>
