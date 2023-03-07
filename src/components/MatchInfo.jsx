@@ -124,7 +124,6 @@ export default function MatchInfo() {
           </Text>
           {isOwner && <IconButton icon="pencil" />}
         </View>
-
         {!isOwner && isParticipant && (
           <Button
             mode="elevated"
@@ -156,70 +155,68 @@ export default function MatchInfo() {
           </Button>
         )}
       </View>
-
       <View
         style={{
           padding: 16,
-          marginBottom: 32,
           flexDirection: 'row',
           alignItems: 'flex-start',
           backgroundColor: theme.colors.secondaryContainer,
         }}>
-        <View style={{padding: 16}}>
+        <View style={{flex: 1}}>
           <Text variant="headlineMedium" style={{fontWeight: 'bold'}}>
             {match.provider.name}
           </Text>
-          <Text variant="bodyLarge" style={{marginBottom: 16}}>
-            {match.provider.address}
-          </Text>
-          <View
-            style={{
-              padding: 4,
-              borderRadius: 10,
-              marginBottom: 16,
-              backgroundColor: theme.colors.primaryContainer,
-              flexDirection: 'row',
-              alignItems: 'center',
-            }}>
-            <IconButton icon="calendar-check" size={15} style={{padding: 0}} />
-            <Text
-              variant="titleMedium"
-              style={{
-                flex: 1,
-                color: theme.colors.onPrimaryContainer,
-                fontWeight: 'bold',
-              }}>
-              {format(new Date(match.start), 'iiii, do MMMM yyyy')}
-            </Text>
-            {isOwner && <IconButton icon="pencil" />}
-          </View>
-          <View
-            style={{
-              padding: 4,
-              borderRadius: 10,
-              backgroundColor: theme.colors.primaryContainer,
-              flexDirection: 'row',
-              alignItems: 'center',
-            }}>
-            <IconButton icon="clock-outline" size={15} style={{padding: 0}} />
-            <Text
-              variant="titleMedium"
-              style={{
-                flex: 1,
-                color: theme.colors.onPrimaryContainer,
-                fontWeight: 'bold',
-              }}>
-              {format(new Date(match.start), 'HH:mm')} -{' '}
-              {format(new Date(match.end), 'HH:mm')}
-            </Text>
-            {isOwner && <IconButton icon="pencil" />}
-          </View>
+          <Text variant="bodyLarge">{match.provider.address}</Text>
         </View>
         {isOwner && <IconButton icon="pencil" />}
       </View>
+      <View style={{padding: 16, marginBottom: 32}}>
+        <View
+          style={{
+            padding: 4,
+            borderRadius: 10,
+            marginBottom: 16,
+            backgroundColor: theme.colors.secondaryContainer,
+            flexDirection: 'row',
+            alignItems: 'center',
+          }}>
+          <IconButton icon="calendar-check" size={15} style={{padding: 0}} />
+          <Text
+            variant="titleMedium"
+            style={{
+              flex: 1,
+              color: theme.colors.onPrimaryContainer,
+              fontWeight: 'bold',
+            }}>
+            {format(new Date(match.start), 'iiii, do MMMM yyyy')}
+          </Text>
+          {isOwner && <IconButton icon="pencil" />}
+        </View>
+        <View
+          style={{
+            padding: 4,
+            borderRadius: 10,
+            backgroundColor: theme.colors.secondaryContainer,
+            flexDirection: 'row',
+            alignItems: 'center',
+          }}>
+          <IconButton icon="clock-outline" size={15} style={{padding: 0}} />
+          <Text
+            variant="titleMedium"
+            style={{
+              flex: 1,
+              color: theme.colors.onPrimaryContainer,
+              fontWeight: 'bold',
+            }}>
+            {format(new Date(match.start), 'HH:mm')} -{' '}
+            {format(new Date(match.end), 'HH:mm')}
+          </Text>
+          {isOwner && <IconButton icon="pencil" />}
+        </View>
+      </View>
       {match.announcements.length > 0 && (
         <>
-          <View style={{marginTop: 64, marginBottom: 32, position: 'relative'}}>
+          <View style={{marginBottom: 32, position: 'relative'}}>
             <Divider style={{backgroundColor: theme.colors.secondary}} />
             <IconButton
               size={20}
