@@ -55,6 +55,8 @@ export default function FormParticipant({form, onChangeForm, setStep}) {
         mode="outlined"
         value={form.name}
         onChangeText={handleChangeName}
+        maxLength={50}
+        right={<TextInput.Affix text={`${String(form.name.length)}/50`} />}
         error={Boolean(errors.name)}
       />
       <HelperText type="error" visible={Boolean(errors.name)}>
