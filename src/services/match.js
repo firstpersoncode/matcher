@@ -43,6 +43,27 @@ export async function updateMatchName(name) {
   });
 }
 
+export async function updateMatchProvider(providerAndSchedule) {
+  await fetcher('/api/v1/match/update/provider', {
+    method: 'PUT',
+    data: providerAndSchedule,
+  });
+}
+
+export async function updateMatchSchedule(slot) {
+  await fetcher('/api/v1/match/update/schedule', {
+    method: 'PUT',
+    data: slot,
+  });
+}
+
+export async function updateMatchParticipant(participant) {
+  await fetcher('/api/v1/match/update/participant', {
+    method: 'PUT',
+    data: participant,
+  });
+}
+
 export async function removeParticipant(participant) {
   await fetcher('/api/v1/match/remove', {
     method: 'PUT',

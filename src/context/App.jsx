@@ -20,6 +20,9 @@ import {
   leaveMatch,
   removeParticipant,
   updateMatchName,
+  updateMatchProvider,
+  updateMatchSchedule,
+  updateMatchParticipant,
 } from '../services/match';
 import {
   announce,
@@ -419,6 +422,18 @@ function useAppState() {
     await updateMatchName(name);
   }
 
+  async function handleUpdateMatchProvider(providerAndSchedule) {
+    await updateMatchProvider(providerAndSchedule);
+  }
+
+  async function handleUpdateMatchSchedule(slot) {
+    await updateMatchSchedule(slot);
+  }
+
+  async function handleUpdateMatchParticipant(form) {
+    await updateMatchParticipant(form);
+  }
+
   async function handleRemoveParticipant(participant) {
     await removeParticipant(participant);
   }
@@ -486,6 +501,9 @@ function useAppState() {
     handleDeleteMatch,
     handleJoinMatch,
     handleUpdateMatchName,
+    handleUpdateMatchProvider,
+    handleUpdateMatchSchedule,
+    handleUpdateMatchParticipant,
     handleRemoveParticipant,
     sendMessage,
     saveLastRead,
