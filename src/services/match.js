@@ -36,6 +36,13 @@ export async function leaveMatch() {
   });
 }
 
+export async function updateMatchName(name) {
+  await fetcher('/api/v1/match/update/name', {
+    method: 'PUT',
+    data: name,
+  });
+}
+
 export async function removeParticipant(participant) {
   await fetcher('/api/v1/match/remove', {
     method: 'PUT',
