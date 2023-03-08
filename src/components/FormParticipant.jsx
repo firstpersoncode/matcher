@@ -1,27 +1,31 @@
-import {useState} from 'react';
+import {useEffect, useState} from 'react';
 import {ScrollView, View} from 'react-native';
+import {useSheetRouter} from 'react-native-actions-sheet';
 import {TextInput, HelperText, Button} from 'react-native-paper';
+import {useSheetContext} from 'src/context/Sheet';
 
 import Counter from './Counter';
 
-export default function FormParticipant({form, onChangeForm, setStep}) {
+export default function FormParticipant() {
+  const {state, setSheetState} = useSheetContext();
+  const route = useSheetRouter();
   const [errors, setErrors] = useState({});
 
   function handleChangeName(text) {
-    onChangeForm('name', text);
+    setSheetState('name', text);
     setErrors(v => ({...v, name: undefined}));
   }
 
   function handleDecrement(field) {
     return function (value) {
-      onChangeForm(field, value);
+      setSheetState(field, value);
       setErrors(v => ({...v, count: undefined, pcount: undefined}));
     };
   }
 
   function handleIncrement(field) {
     return function (value) {
-      onChangeForm(field, value);
+      setSheetState(field, value);
       setErrors(v => ({...v, count: undefined, pcount: undefined}));
     };
   }
@@ -29,12 +33,13 @@ export default function FormParticipant({form, onChangeForm, setStep}) {
   function validate() {
     let errors = {};
 
-    if (!form.name) errors = {...errors, name: 'required'};
-    if (!form.count) errors = {...errors, count: 'required'};
-    else if (form.count < form.pcount) errors = {...errors, count: 'invalid'};
+    if (!state.name) errors = {...errors, name: 'required'};
+    if (!state.count) errors = {...errors, count: 'required'};
+    else if (state.count < state.pcount) errors = {...errors, count: 'invalid'};
 
-    if (!form.pcount) errors = {...errors, pcount: 'required'};
-    else if (form.pcount > form.count) errors = {...errors, pcount: 'invalid'};
+    if (!state.pcount) errors = {...errors, pcount: 'required'};
+    else if (state.pcount > state.count)
+      errors = {...errors, pcount: 'invalid'};
 
     setErrors(errors);
 
@@ -45,7 +50,7 @@ export default function FormParticipant({form, onChangeForm, setStep}) {
     const isValid = !Object.keys(validate()).length;
     if (!isValid) return;
 
-    setStep(2);
+    route.navigate('provider');
   }
 
   return (
@@ -53,10 +58,10 @@ export default function FormParticipant({form, onChangeForm, setStep}) {
       <TextInput
         label="Name"
         mode="outlined"
-        value={form.name}
+        value={state.name}
         onChangeText={handleChangeName}
         maxLength={50}
-        right={<TextInput.Affix text={`${String(form.name.length)}/50`} />}
+        right={<TextInput.Affix text={`${String(state.name.length)}/50`} />}
         error={Boolean(errors.name)}
       />
       <HelperText type="error" visible={Boolean(errors.name)}>
@@ -65,7 +70,7 @@ export default function FormParticipant({form, onChangeForm, setStep}) {
 
       <Counter
         label="Needed"
-        value={form.count}
+        value={state.count}
         onDecrement={handleDecrement('count')}
         onIncrement={handleIncrement('count')}
         error={errors.count}
@@ -73,7 +78,7 @@ export default function FormParticipant({form, onChangeForm, setStep}) {
 
       <Counter
         label="Available"
-        value={form.pcount}
+        value={state.pcount}
         onDecrement={handleDecrement('pcount')}
         onIncrement={handleIncrement('pcount')}
         error={errors.pcount}

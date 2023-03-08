@@ -1,5 +1,6 @@
 import {useEffect, useState} from 'react';
 import {FlatList, RefreshControl, View} from 'react-native';
+import {useSheetRouter} from 'react-native-actions-sheet';
 import {
   IconButton,
   Divider,
@@ -9,11 +10,14 @@ import {
 } from 'react-native-paper';
 
 import {useAppContext} from 'src/context/App';
+import {useSheetContext} from 'src/context/Sheet';
 
 import ProviderCard from './ProviderCard';
 
-export default function FormProvider({onChangeForm, setStep}) {
+export default function FormProvider() {
   const {providers, getProviders} = useAppContext();
+  const {setSheetState} = useSheetContext();
+  const route = useSheetRouter();
   const theme = useTheme();
   const [isRefreshing, setIsRefreshing] = useState(false);
 
@@ -30,7 +34,7 @@ export default function FormProvider({onChangeForm, setStep}) {
   }
 
   function onBack() {
-    setStep(1);
+    route.goBack();
   }
 
   async function onRefresh() {
@@ -41,8 +45,8 @@ export default function FormProvider({onChangeForm, setStep}) {
 
   function selectProvider(provider) {
     return function () {
-      onChangeForm('provider', provider);
-      setStep(3);
+      setSheetState('provider', provider);
+      route.navigate('schedule');
     };
   }
 

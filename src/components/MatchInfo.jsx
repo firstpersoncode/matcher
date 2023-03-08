@@ -1,28 +1,47 @@
-import {useEffect, useMemo, useRef, useState} from 'react';
-import {View, ScrollView, Linking} from 'react-native';
+import {useCallback, useEffect, useMemo, useRef, useState} from 'react';
+import {
+  View,
+  ScrollView,
+  Linking,
+  RefreshControl,
+  FlatList,
+} from 'react-native';
 import {
   Button,
   Card,
   Divider,
   HelperText,
   IconButton,
+  Searchbar,
   Text,
   TextInput,
   useTheme,
 } from 'react-native-paper';
 import Hyperlink from 'react-native-hyperlink';
 import {useRoute} from '@react-navigation/native';
-import {format} from 'date-fns';
+import {
+  format,
+  isWithinInterval,
+  setHours,
+  setMinutes,
+  startOfDay,
+} from 'date-fns';
+import {useSheetRouter} from 'react-native-actions-sheet';
 
+import {DAY_MAPS} from 'src/utils/constants';
 import {useAppContext} from 'src/context/App';
 import {useModalContext} from 'src/context/Modal';
-import Map from './Map';
 import {useSheetContext} from 'src/context/Sheet';
+
+import SlotPicker from './SlotPicker';
+import CalendarPicker from './CalendarPicker';
+import Map from './Map';
+import ProviderCard from './ProviderCard';
 
 export default function MatchInfo() {
   const {user, matches} = useAppContext();
   const {displayModal} = useModalContext();
-  const {displaySheet} = useSheetContext();
+  const {displaySheet, displaySheetRoute} = useSheetContext();
 
   const theme = useTheme();
   const route = useRoute();
@@ -49,7 +68,29 @@ export default function MatchInfo() {
   }
 
   function onEditName() {
-    displaySheet(<EditName match={match} />, '30%');
+    displaySheet({content: <EditName />, height: '30%'});
+  }
+
+  function onEditProvider() {
+    displaySheetRoute({
+      routes: [
+        {
+          name: 'provider',
+          component: EditProvider,
+        },
+        {
+          name: 'schedule',
+          component: EditProviderSchedule,
+        },
+      ],
+      initialRoute: 'provider',
+      height: '75%',
+      state: {provider: null, start: null, end: null},
+    });
+  }
+
+  function onEditSchedule() {
+    displaySheet({content: <EditSchedule />, height: '75%'});
   }
 
   return (
@@ -72,7 +113,12 @@ export default function MatchInfo() {
             flex: 1,
           }}>
           {isOwner && (
-            <IconButton size={18} onPress={onEditName} icon="pencil" />
+            <IconButton
+              mode="contained"
+              size={18}
+              onPress={onEditName}
+              icon="pencil"
+            />
           )}
           <Text variant="headlineLarge" style={{fontWeight: 'bold', flex: 1}}>
             {match.name}
@@ -98,7 +144,14 @@ export default function MatchInfo() {
           alignItems: 'flex-start',
           backgroundColor: theme.colors.secondaryContainer,
         }}>
-        {isOwner && <IconButton size={18} icon="pencil" />}
+        {isOwner && (
+          <IconButton
+            mode="contained"
+            onPress={onEditProvider}
+            size={18}
+            icon="pencil"
+          />
+        )}
         <View style={{flex: 1}}>
           <Text
             variant="titleLarge"
@@ -108,32 +161,42 @@ export default function MatchInfo() {
           <Text variant="bodyLarge" style={{marginBottom: 16}}>
             {match.provider.address}
           </Text>
-          <View style={{flexDirection: 'row', alignItems: 'center'}}>
-            {isOwner && <IconButton size={18} icon="pencil" />}
-            <IconButton icon="calendar-check" />
-            <Text
-              variant="titleMedium"
-              style={{
-                flex: 1,
-                color: theme.colors.onPrimaryContainer,
-                fontWeight: 'bold',
-              }}>
-              {format(new Date(match.start), 'iiii, do MMMM yyyy')}
-            </Text>
-          </View>
-          <View style={{flexDirection: 'row', alignItems: 'center'}}>
-            {isOwner && <IconButton size={18} icon="pencil" />}
-            <IconButton icon="clock-outline" />
-            <Text
-              variant="titleMedium"
-              style={{
-                flex: 1,
-                color: theme.colors.onPrimaryContainer,
-                fontWeight: 'bold',
-              }}>
-              {format(new Date(match.start), 'HH:mm')} -{' '}
-              {format(new Date(match.end), 'HH:mm')}
-            </Text>
+          <View style={{flexDirection: 'row', alignItems: 'flex-start'}}>
+            {isOwner && (
+              <IconButton
+                mode="contained"
+                onPress={onEditSchedule}
+                size={18}
+                icon="pencil"
+              />
+            )}
+            <View style={{flex: 1}}>
+              <View style={{flexDirection: 'row', alignItems: 'center'}}>
+                <IconButton icon="calendar-check" />
+                <Text
+                  variant="titleMedium"
+                  style={{
+                    flex: 1,
+                    color: theme.colors.onPrimaryContainer,
+                    fontWeight: 'bold',
+                  }}>
+                  {format(new Date(match.start), 'iiii, do MMMM yyyy')}
+                </Text>
+              </View>
+              <View style={{flexDirection: 'row', alignItems: 'center'}}>
+                <IconButton icon="clock-outline" />
+                <Text
+                  variant="titleMedium"
+                  style={{
+                    flex: 1,
+                    color: theme.colors.onPrimaryContainer,
+                    fontWeight: 'bold',
+                  }}>
+                  {format(new Date(match.start), 'HH:mm')} -{' '}
+                  {format(new Date(match.end), 'HH:mm')}
+                </Text>
+              </View>
+            </View>
           </View>
         </View>
       </View>
@@ -176,12 +239,12 @@ export default function MatchInfo() {
   );
 }
 
-function EditName({match}) {
-  const {handleUpdateMatchName} = useAppContext();
+function EditName() {
+  const {user, handleUpdateMatchName} = useAppContext();
   const {hideSheet} = useSheetContext();
   const inputRef = useRef();
   const timeoutRef = useRef();
-  const [name, setName] = useState(match.name);
+  const [name, setName] = useState(user.match.name);
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   useEffect(() => {
@@ -202,7 +265,7 @@ function EditName({match}) {
   async function onSubmit() {
     if (!Boolean(name.trim())) return;
 
-    if (name === match.name) {
+    if (name === user.match.name) {
       inputRef.current?.blur();
       hideSheet();
     }
@@ -242,5 +305,518 @@ function EditName({match}) {
         Update
       </Button>
     </View>
+  );
+}
+
+function EditProvider() {
+  const {providers, getProviders} = useAppContext();
+  const {setSheetState} = useSheetContext();
+  const theme = useTheme();
+  const route = useSheetRouter();
+  const [isRefreshing, setIsRefreshing] = useState(false);
+
+  useEffect(() => {
+    if (!providers.length) loadProviders();
+  }, [providers.length]);
+
+  async function loadProviders() {
+    try {
+      await getProviders();
+    } catch (err) {
+      console.error(err.message || err);
+    }
+  }
+
+  async function onRefresh() {
+    setIsRefreshing(true);
+    await getProviders();
+    setIsRefreshing(false);
+  }
+
+  function selectProvider(provider) {
+    return function () {
+      setSheetState('provider', provider);
+      route.navigate('schedule');
+    };
+  }
+
+  return (
+    <>
+      <View
+        keyboardShouldPersistTaps="handled"
+        style={{
+          paddingLeft: 16,
+          paddingRight: 16,
+          paddingTop: 16,
+          paddingBottom: 8,
+        }}>
+        <View style={{flexDirection: 'row'}}>
+          <View style={{flex: 1, paddingRight: 8}}>
+            <Searchbar
+              style={{
+                backgroundColor: '#FFF',
+                borderWidth: 1,
+                borderColor: theme.colors.secondary,
+              }}
+              placeholder="Search Provider..."
+            />
+            <HelperText>By name, address</HelperText>
+          </View>
+          <IconButton mode="contained" icon="filter-variant" />
+        </View>
+      </View>
+      <Divider />
+      <FlatList
+        data={providers}
+        renderItem={({item}) => (
+          <ProviderCard provider={item} onPress={selectProvider(item)} />
+        )}
+        keyExtractor={item => item._id}
+        refreshControl={
+          <RefreshControl refreshing={isRefreshing} onRefresh={onRefresh} />
+        }
+      />
+    </>
+  );
+}
+
+function EditProviderSchedule() {
+  const {matches, handleUpdateMatchProvider} = useAppContext();
+  const {state, setSheetState, cleanSheetState, hideSheetRoute} =
+    useSheetContext();
+  const route = useSheetRouter();
+  const theme = useTheme();
+  const [availability, setAvailability] = useState(null);
+  const [date, setDate] = useState(null);
+  const [errors, setErrors] = useState({});
+  const scrollViewRef = useRef();
+  const [calendarLayout, setCalendarLayout] = useState(null);
+  const [slotLayout, setSlotLayout] = useState(null);
+  const [isSubmitting, setIsSubmitting] = useState(false);
+
+  function onBack() {
+    route.goBack();
+  }
+
+  const events = useMemo(
+    () =>
+      matches
+        .filter(m => String(m.provider._id) !== String(state.provider?._id))
+        .map(m => ({
+          _id: m._id,
+          title: m.name,
+          start: new Date(m.start),
+          end: new Date(m.end),
+        })),
+    [matches, state.provider?._id],
+  );
+
+  const disableDay = useCallback(
+    date => {
+      const day = format(new Date(date), 'iii').toLowerCase();
+      return day !== availability?.day;
+    },
+    [availability?.day],
+  );
+
+  const disableSlot = useCallback(
+    slot => {
+      if (!date) return true;
+
+      let slotDate = setHours(startOfDay(new Date(date)), slot.split(':')[0]);
+      slotDate = setMinutes(slotDate, slot.split(':')[1]);
+
+      return !isWithinAvailability(slotDate);
+    },
+    [date],
+  );
+
+  function selectAvailability(a) {
+    return function () {
+      setAvailability(a);
+      setErrors(v => ({...v, availability: undefined}));
+      scrollViewRef.current?.scrollTo({
+        x: 0,
+        y: calendarLayout?.y,
+        animated: true,
+      });
+    };
+  }
+
+  function onChangeDate(date) {
+    setDate(date);
+    setErrors(v => ({...v, date: undefined}));
+    scrollViewRef.current?.scrollTo({
+      x: 0,
+      y: slotLayout?.y,
+      animated: true,
+    });
+  }
+
+  function onSelectSlot(slot) {
+    setSheetState('start', slot.start);
+    setSheetState('end', slot.end);
+    setErrors(v => ({...v, slot: undefined}));
+  }
+
+  function isWithinAvailability(d) {
+    if (!(availability && date && d)) return false;
+
+    let startHour = setHours(
+      startOfDay(new Date(date)),
+      availability.start.split(':')[0],
+    );
+
+    startHour = setMinutes(startHour, availability.start.split(':')[1]);
+
+    let endHour = setHours(
+      startOfDay(new Date(date)),
+      availability.end.split(':')[0],
+    );
+
+    endHour = setMinutes(endHour, availability.end.split(':')[1]);
+
+    return isWithinInterval(new Date(d), {
+      start: startHour,
+      end: endHour,
+    });
+  }
+
+  function validate() {
+    let errors = {};
+
+    if (!availability) errors = {...errors, availability: 'required'};
+    else if (
+      !state.provider?.availabilities.find(a => a.day === availability.day)
+    )
+      errors = {...errors, availability: 'invalid'};
+
+    if (!date) errors = {...errors, date: 'required'};
+    else if (format(date, 'iii').toLowerCase() !== availability?.day)
+      errors = {...errors, date: 'invalid'};
+
+    if (!(state.start && state.end)) errors = {...errors, slot: 'required'};
+    else {
+      const withinAvailability =
+        isWithinAvailability(new Date(state.start)) &&
+        isWithinAvailability(new Date(state.end));
+
+      if (!withinAvailability) errors = {...errors, slot: 'invalid'};
+    }
+
+    setErrors(errors);
+
+    return errors;
+  }
+
+  async function handleSubmit() {
+    const isValid = !Object.keys(validate()).length;
+    if (!isValid) return;
+
+    setIsSubmitting(true);
+    try {
+      await handleUpdateMatchProvider({
+        ...state,
+        providerRef: state.provider._id,
+      });
+      hideSheetRoute();
+      cleanSheetState();
+    } catch (err) {
+      console.error(err.message || err);
+    }
+    setIsSubmitting(false);
+  }
+
+  return (
+    <>
+      <View
+        style={{
+          paddingTop: 16,
+          paddingBottom: 8,
+          flexDirection: 'row',
+          alignItems: 'center',
+        }}>
+        <IconButton icon="arrow-left" onPress={onBack} />
+        {date && (
+          <Text variant="titleLarge">
+            {format(new Date(date), 'dd MMM yyyy')}
+          </Text>
+        )}
+      </View>
+      <Divider />
+      <ScrollView ref={scrollViewRef} style={{padding: 16, marginBottom: 16}}>
+        {state.provider.availabilities.map((a, i) => {
+          const selected = a.day === availability?.day;
+
+          return (
+            <Button
+              key={i}
+              onPress={selectAvailability(a)}
+              mode="elevated"
+              buttonColor={
+                selected ? theme.colors.primaryContainer : theme.colors.surface
+              }
+              textColor={
+                selected
+                  ? theme.colors.onPrimaryContainer
+                  : theme.colors.onSurface
+              }
+              style={{marginBottom: 16}}>
+              {DAY_MAPS[a.day]} {a.start} - {a.end}
+            </Button>
+          );
+        })}
+        <HelperText type="error" visible={Boolean(errors.availability)}>
+          {errors.availability}
+        </HelperText>
+        <Divider />
+        <View onLayout={e => setCalendarLayout(e.nativeEvent.layout)}>
+          <CalendarPicker
+            minDate={new Date()}
+            selectedDate={date}
+            onChangeDate={onChangeDate}
+            disableDay={disableDay}
+            events={events}
+          />
+          <HelperText type="error" visible={Boolean(errors.date)}>
+            {errors.date}
+          </HelperText>
+        </View>
+        <Divider style={{marginBottom: 16}} />
+        <View onLayout={e => setSlotLayout(e.nativeEvent.layout)}>
+          <SlotPicker
+            events={events}
+            selectedDate={date}
+            onSelectSlot={onSelectSlot}
+            disableSlot={disableSlot}
+          />
+          <HelperText type="error" visible={Boolean(errors.slot)}>
+            {errors.slot}
+          </HelperText>
+        </View>
+        <Button
+          disabled={isSubmitting}
+          style={{marginBottom: 32}}
+          mode="contained"
+          onPress={handleSubmit}>
+          Submit
+        </Button>
+      </ScrollView>
+    </>
+  );
+}
+
+function EditSchedule() {
+  const {matches, handleUpdateMatchSchedule, user} = useAppContext();
+  const {hideSheet} = useSheetContext();
+  const theme = useTheme();
+  const [availability, setAvailability] = useState(null);
+  const [date, setDate] = useState(null);
+  const [slot, setSlot] = useState(null);
+  const [errors, setErrors] = useState({});
+  const scrollViewRef = useRef();
+  const [calendarLayout, setCalendarLayout] = useState(null);
+  const [slotLayout, setSlotLayout] = useState(null);
+  const [isSubmitting, setIsSubmitting] = useState(false);
+
+  const events = useMemo(
+    () =>
+      matches
+        .filter(m => String(m.provider._id) !== String(user.match.provider._id))
+        .map(m => ({
+          _id: m._id,
+          title: m.name,
+          start: new Date(m.start),
+          end: new Date(m.end),
+        })),
+    [matches, user.match.provider._id],
+  );
+
+  const disableDay = useCallback(
+    date => {
+      const day = format(new Date(date), 'iii').toLowerCase();
+      return day !== availability?.day;
+    },
+    [availability?.day],
+  );
+
+  const disableSlot = useCallback(
+    slot => {
+      if (!date) return true;
+
+      let slotDate = setHours(startOfDay(new Date(date)), slot.split(':')[0]);
+      slotDate = setMinutes(slotDate, slot.split(':')[1]);
+
+      return !isWithinAvailability(slotDate);
+    },
+    [date],
+  );
+
+  function selectAvailability(a) {
+    return function () {
+      setAvailability(a);
+      setErrors(v => ({...v, availability: undefined}));
+      scrollViewRef.current?.scrollTo({
+        x: 0,
+        y: calendarLayout?.y,
+        animated: true,
+      });
+    };
+  }
+
+  function onChangeDate(date) {
+    setDate(date);
+    setErrors(v => ({...v, date: undefined}));
+    scrollViewRef.current?.scrollTo({
+      x: 0,
+      y: slotLayout?.y,
+      animated: true,
+    });
+  }
+
+  function onSelectSlot(slot) {
+    setSlot({start: slot.start, end: slot.end});
+    setErrors(v => ({...v, slot: undefined}));
+  }
+
+  function isWithinAvailability(d) {
+    if (!(availability && date && d)) return false;
+
+    let startHour = setHours(
+      startOfDay(new Date(date)),
+      availability.start.split(':')[0],
+    );
+
+    startHour = setMinutes(startHour, availability.start.split(':')[1]);
+
+    let endHour = setHours(
+      startOfDay(new Date(date)),
+      availability.end.split(':')[0],
+    );
+
+    endHour = setMinutes(endHour, availability.end.split(':')[1]);
+
+    return isWithinInterval(new Date(d), {
+      start: startHour,
+      end: endHour,
+    });
+  }
+
+  function validate() {
+    let errors = {};
+
+    if (!availability) errors = {...errors, availability: 'required'};
+    else if (
+      !user.match.provider?.availabilities.find(a => a.day === availability.day)
+    )
+      errors = {...errors, availability: 'invalid'};
+
+    if (!date) errors = {...errors, date: 'required'};
+    else if (format(date, 'iii').toLowerCase() !== availability?.day)
+      errors = {...errors, date: 'invalid'};
+
+    if (!(slot.start && slot.end)) errors = {...errors, slot: 'required'};
+    else {
+      const withinAvailability =
+        isWithinAvailability(new Date(slot.start)) &&
+        isWithinAvailability(new Date(slot.end));
+
+      if (!withinAvailability) errors = {...errors, slot: 'invalid'};
+    }
+
+    setErrors(errors);
+
+    return errors;
+  }
+
+  async function handleSubmit() {
+    const isValid = !Object.keys(validate()).length;
+    if (!isValid) return;
+
+    setIsSubmitting(true);
+    try {
+      await handleUpdateMatchSchedule(slot);
+      hideSheet();
+    } catch (err) {
+      console.error(err.message || err);
+    }
+    setIsSubmitting(false);
+  }
+
+  return (
+    <>
+      <View
+        style={{
+          padding: 16,
+          paddingBottom: 8,
+          flexDirection: 'row',
+          alignItems: 'center',
+        }}>
+        {date && (
+          <Text variant="titleLarge">
+            {format(new Date(date), 'dd MMM yyyy')}
+          </Text>
+        )}
+      </View>
+      <Divider />
+      <ScrollView ref={scrollViewRef} style={{padding: 16, marginBottom: 16}}>
+        {user.match.provider.availabilities.map((a, i) => {
+          const selected = a.day === availability?.day;
+
+          return (
+            <Button
+              key={i}
+              onPress={selectAvailability(a)}
+              mode="elevated"
+              buttonColor={
+                selected ? theme.colors.primaryContainer : theme.colors.surface
+              }
+              textColor={
+                selected
+                  ? theme.colors.onPrimaryContainer
+                  : theme.colors.onSurface
+              }
+              style={{marginBottom: 16}}>
+              {DAY_MAPS[a.day]} {a.start} - {a.end}
+            </Button>
+          );
+        })}
+        <HelperText type="error" visible={Boolean(errors.availability)}>
+          {errors.availability}
+        </HelperText>
+        <Divider />
+        <View onLayout={e => setCalendarLayout(e.nativeEvent.layout)}>
+          <CalendarPicker
+            minDate={new Date()}
+            selectedDate={date}
+            onChangeDate={onChangeDate}
+            disableDay={disableDay}
+            events={events}
+          />
+          <HelperText type="error" visible={Boolean(errors.date)}>
+            {errors.date}
+          </HelperText>
+        </View>
+        <Divider style={{marginBottom: 16}} />
+        <View onLayout={e => setSlotLayout(e.nativeEvent.layout)}>
+          <SlotPicker
+            events={events}
+            selectedDate={date}
+            onSelectSlot={onSelectSlot}
+            disableSlot={disableSlot}
+          />
+          <HelperText type="error" visible={Boolean(errors.slot)}>
+            {errors.slot}
+          </HelperText>
+        </View>
+        <Button
+          disabled={isSubmitting}
+          style={{marginBottom: 32}}
+          mode="contained"
+          onPress={handleSubmit}>
+          Submit
+        </Button>
+      </ScrollView>
+    </>
   );
 }

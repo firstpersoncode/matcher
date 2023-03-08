@@ -22,10 +22,13 @@ import {DAY_MAPS} from 'src/utils/constants';
 import SlotPicker from './SlotPicker';
 import CalendarPicker from './CalendarPicker';
 import {useSheetContext} from 'src/context/Sheet';
+import {useSheetRouter} from 'react-native-actions-sheet';
 
-export default function FormScheduler({form, onChangeForm, setStep}) {
+export default function FormScheduler() {
   const {matches, handleCreateMatch} = useAppContext();
-  const {hideSheet} = useSheetContext();
+  const {state, setSheetState, cleanSheetState, hideSheetRoute} =
+    useSheetContext();
+  const route = useSheetRouter();
   const theme = useTheme();
   const [availability, setAvailability] = useState(null);
   const [date, setDate] = useState(new Date());
@@ -36,20 +39,20 @@ export default function FormScheduler({form, onChangeForm, setStep}) {
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   function onBack() {
-    setStep(2);
+    route.goBack();
   }
 
   const events = useMemo(
     () =>
       matches
-        .filter(m => String(m.provider._id) !== String(form.provider?._id))
+        .filter(m => String(m.provider._id) !== String(state.provider?._id))
         .map(m => ({
           _id: m._id,
           title: m.name,
           start: new Date(m.start),
           end: new Date(m.end),
         })),
-    [matches, form.provider?._id],
+    [matches, state.provider?._id],
   );
 
   const disableDay = useCallback(
@@ -95,8 +98,8 @@ export default function FormScheduler({form, onChangeForm, setStep}) {
   }
 
   function onSelectSlot(slot) {
-    onChangeForm('start', slot.start);
-    onChangeForm('end', slot.end);
+    setSheetState('start', slot.start);
+    setSheetState('end', slot.end);
     setErrors(v => ({...v, slot: undefined}));
   }
 
@@ -128,7 +131,7 @@ export default function FormScheduler({form, onChangeForm, setStep}) {
 
     if (!availability) errors = {...errors, availability: 'required'};
     else if (
-      !form.provider?.availabilities.find(a => a.day === availability.day)
+      !state.provider?.availabilities.find(a => a.day === availability.day)
     )
       errors = {...errors, availability: 'invalid'};
 
@@ -136,11 +139,11 @@ export default function FormScheduler({form, onChangeForm, setStep}) {
     else if (format(date, 'iii').toLowerCase() !== availability?.day)
       errors = {...errors, date: 'invalid'};
 
-    if (!(form.start && form.end)) errors = {...errors, slot: 'required'};
+    if (!(state.start && state.end)) errors = {...errors, slot: 'required'};
     else {
       const withinAvailability =
-        isWithinAvailability(new Date(form.start)) &&
-        isWithinAvailability(new Date(form.end));
+        isWithinAvailability(new Date(state.start)) &&
+        isWithinAvailability(new Date(state.end));
 
       if (!withinAvailability) errors = {...errors, slot: 'invalid'};
     }
@@ -156,8 +159,9 @@ export default function FormScheduler({form, onChangeForm, setStep}) {
 
     setIsSubmitting(true);
     try {
-      await handleCreateMatch({...form, providerRef: form.provider._id});
-      hideSheet();
+      await handleCreateMatch({...state, providerRef: state.provider._id});
+      hideSheetRoute();
+      cleanSheetState();
     } catch (err) {
       console.error(err.message || err);
     }
@@ -182,7 +186,7 @@ export default function FormScheduler({form, onChangeForm, setStep}) {
       </View>
       <Divider />
       <ScrollView ref={scrollViewRef} style={{padding: 16, marginBottom: 16}}>
-        {form.provider.availabilities.map((a, i) => {
+        {state.provider.availabilities.map((a, i) => {
           const selected = a.day === availability?.day;
 
           return (

@@ -17,10 +17,13 @@ import Header from 'src/components/Header';
 import Account from 'src/components/Account';
 import MatchCard from 'src/components/MatchCard';
 import MatchCreator from 'src/components/MatchCreator';
+import FormParticipant from 'src/components/FormParticipant';
+import FormProvider from 'src/components/FormProvider';
+import FormScheduler from 'src/components/FormScheduler';
 
 export default function Matcher() {
   const {user, matches, init} = useAppContext();
-  const {displaySheet, hideSheet} = useSheetContext();
+  const {displaySheetRoute} = useSheetContext();
   const navigation = useNavigation();
   const theme = useTheme();
   const [isRefreshing, setIsRefreshing] = useState(false);
@@ -50,7 +53,32 @@ export default function Matcher() {
   }
 
   function openMatchCreator() {
-    displaySheet(<MatchCreator onClose={hideSheet} />, '75%');
+    displaySheetRoute({
+      routes: [
+        {
+          name: 'participant',
+          component: FormParticipant,
+        },
+        {
+          name: 'provider',
+          component: FormProvider,
+        },
+        {
+          name: 'schedule',
+          component: FormScheduler,
+        },
+      ],
+      initialRoute: 'participant',
+      height: '75%',
+      state: {
+        name: '',
+        count: 0,
+        pcount: 0,
+        provider: null,
+        start: null,
+        end: null,
+      },
+    });
   }
 
   return (

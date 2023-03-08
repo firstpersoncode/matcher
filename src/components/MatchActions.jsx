@@ -93,7 +93,9 @@ export default function MatchActions() {
   }
 
   function openJoinMatch() {
-    displaySheet(<MatchJoin maxJoined={maxJoined} onSubmit={joinMatch} />);
+    displaySheet({
+      content: <MatchJoin maxJoined={maxJoined} onSubmit={joinMatch} />,
+    });
   }
 
   async function joinMatch(count) {
