@@ -7,7 +7,6 @@ import {useAppContext} from 'src/context/App';
 
 export default function MatchParticipant() {
   const {matches} = useAppContext();
-  const theme = useTheme();
   const route = useRoute();
   const match = useMemo(
     () => matches.find(m => String(m._id) === String(route.params.matchRef)),
@@ -15,7 +14,7 @@ export default function MatchParticipant() {
   );
 
   return (
-    <ScrollView style={{padding: 16, backgroundColor: theme.colors.background}}>
+    <ScrollView style={{padding: 16}}>
       {match.participants.map(({participant, count}) => (
         <Participant
           key={participant._id}
