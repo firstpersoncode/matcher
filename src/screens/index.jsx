@@ -1,26 +1,27 @@
+import {createMaterialTopTabNavigator} from '@react-navigation/material-top-tabs';
 import {createNativeStackNavigator} from '@react-navigation/native-stack';
-
-import Header from 'src/components/Header';
 
 import Matcher from './Matcher';
 import Match from './Match';
 import Account from './Account';
 
+const Tab = createMaterialTopTabNavigator();
 const Stack = createNativeStackNavigator();
 
 export default function Screens() {
   return (
-    <Stack.Navigator>
-      <Stack.Group screenOptions={{header: Header}}>
-        <Stack.Screen name="Matcher" component={Matcher} />
-        <Stack.Screen name="Match" component={Match} />
-      </Stack.Group>
+    <Tab.Navigator tabBar={() => null}>
+      <Tab.Screen name="Root" component={Root} />
+      <Tab.Screen name="Account" component={Account} />
+    </Tab.Navigator>
+  );
+}
 
-      <Stack.Screen
-        name="Account"
-        component={Account}
-        options={{animation: 'slide_from_right'}}
-      />
+function Root() {
+  return (
+    <Stack.Navigator screenOptions={{header: () => null}}>
+      <Stack.Screen name="Matcher" component={Matcher} />
+      <Stack.Screen name="Match" component={Match} />
     </Stack.Navigator>
   );
 }
