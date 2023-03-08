@@ -6,6 +6,7 @@ import {
   HelperText,
   Button,
   Divider,
+  Text,
 } from 'react-native-paper';
 import {
   format,
@@ -165,7 +166,20 @@ export default function FormScheduler({form, onChangeForm, setStep}) {
 
   return (
     <>
-      <IconButton icon="arrow-left" onPress={onBack} />
+      <View
+        style={{
+          paddingTop: 16,
+          paddingBottom: 8,
+          flexDirection: 'row',
+          alignItems: 'center',
+        }}>
+        <IconButton icon="arrow-left" onPress={onBack} />
+        {date && (
+          <Text variant="titleLarge">
+            {format(new Date(date), 'dd MMM yyyy')}
+          </Text>
+        )}
+      </View>
       <Divider />
       <ScrollView ref={scrollViewRef} style={{padding: 16, marginBottom: 16}}>
         {form.provider.availabilities.map((a, i) => {
