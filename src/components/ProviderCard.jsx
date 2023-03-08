@@ -43,7 +43,6 @@ export default function ProviderCard({provider, onPress}) {
             <Button
               mode="contained"
               icon="map-marker"
-              style={{width: 150}}
               onPress={toggleVisibleMap}>
               ~ {Math.floor(provider.distance / 1000)} km
             </Button>
