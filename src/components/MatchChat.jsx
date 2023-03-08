@@ -69,7 +69,8 @@ export default function MatchChat() {
           value={message}
           onChangeText={onTypingMessage}
           multiline
-          maxLength={200}
+          maxLength={500}
+          right={<TextInput.Affix text={`${String(message.length)}/500`} />}
         />
         <IconButton
           disabled={isSending}
