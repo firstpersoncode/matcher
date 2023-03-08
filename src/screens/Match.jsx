@@ -3,9 +3,11 @@ import {View, useWindowDimensions} from 'react-native';
 import {Avatar, Badge, Text, useTheme} from 'react-native-paper';
 import {useNavigation, useRoute} from '@react-navigation/native';
 import {TabView, TabBar} from 'react-native-tab-view';
+import {SafeAreaView} from 'react-native-safe-area-context';
 
 import {useAppContext} from 'src/context/App';
-import Map from 'src/components/Map';
+import Header from 'src/components/Header';
+import MatchActions from 'src/components/MatchActions';
 import MatchInfo from 'src/components/MatchInfo';
 import MatchParticipant from 'src/components/MatchParticipant';
 import MatchChat from 'src/components/MatchChat';
@@ -21,11 +23,11 @@ export default function Match() {
     {key: 'information-outline', title: 'Info'},
     {key: 'account-multiple', title: 'Participant'},
     {key: 'chat', title: 'Chat'},
-    {key: 'map-marker', title: 'Location'},
   ]);
+
   const match = useMemo(
-    () => matches.find(m => String(m._id) === String(route.params.matchRef)),
-    [matches, route.params.matchRef],
+    () => matches.find(m => String(m._id) === String(route.params?.matchRef)),
+    [matches, route.params?.matchRef],
   );
 
   const isParticipant = useMemo(
@@ -61,15 +63,7 @@ export default function Match() {
           return <MatchParticipant />;
         case 'chat':
           return <MatchChat />;
-        case 'map-marker':
-          return match ? (
-            <Map
-              liteMode={false}
-              title={match.provider.name}
-              description={match.provider.address}
-              center={match.location.coordinates.slice().reverse()}
-            />
-          ) : null;
+
         default:
           return null;
       }
@@ -87,20 +81,20 @@ export default function Match() {
       return (
         <TabBar
           {...props}
-          style={{backgroundColor: theme.colors.primary}}
+          style={{backgroundColor: theme.colors.background}}
           tabStyle={{padding: 0}}
           getLabelText={() => null}
-          indicatorStyle={{bottom: 'auto', top: 0}}
+          indicatorStyle={{backgroundColor: theme.colors.primary, height: 3}}
           renderIcon={({route, color}) => (
             <View style={{flexDirection: 'row', alignItems: 'center'}}>
               <Avatar.Icon
                 icon={route.key}
                 size={40}
-                color={color}
+                color="#000"
                 style={{backgroundColor: 'transparent'}}
               />
               {route.key === 'account-multiple' && (
-                <Text style={{color}}>
+                <Text>
                   {joinedCount} / {match.count}
                 </Text>
               )}
@@ -122,19 +116,26 @@ export default function Match() {
   if (!match)
     return (
       <View style={{flex: 1, justifyContent: 'center', alignItems: 'center'}}>
-        <Text>Match already removed</Text>
+        <Text>Match not found</Text>
       </View>
     );
 
   return (
-    <TabView
-      lazy
-      navigationState={{index, routes}}
-      renderScene={renderScene}
-      renderTabBar={renderTabBar}
-      onIndexChange={setIndex}
-      initialLayout={{width: layout.width}}
-      tabBarPosition="bottom"
-    />
+    <SafeAreaView style={{flex: 1, backgroundColor: theme.colors.background}}>
+      <Header back>
+        <View style={{paddingRight: 16}}>
+          <MatchActions />
+        </View>
+      </Header>
+      <TabView
+        lazy
+        navigationState={{index, routes}}
+        renderScene={renderScene}
+        renderTabBar={renderTabBar}
+        onIndexChange={setIndex}
+        initialLayout={{width: layout.width}}
+        // tabBarPosition="bottom"
+      />
+    </SafeAreaView>
   );
 }

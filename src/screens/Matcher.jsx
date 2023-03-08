@@ -1,10 +1,20 @@
 import {useEffect, useMemo, useState} from 'react';
 import {FlatList, RefreshControl, View} from 'react-native';
-import {FAB, useTheme} from 'react-native-paper';
+import {
+  Divider,
+  FAB,
+  HelperText,
+  IconButton,
+  Searchbar,
+  useTheme,
+} from 'react-native-paper';
 import {useNavigation} from '@react-navigation/native';
+import {SafeAreaView} from 'react-native-safe-area-context';
 
 import {useAppContext} from 'src/context/App';
 import {useSheetContext} from 'src/context/Sheet';
+import Header from 'src/components/Header';
+import Account from 'src/components/Account';
 import MatchCard from 'src/components/MatchCard';
 import MatchCreator from 'src/components/MatchCreator';
 
@@ -14,7 +24,7 @@ export default function Matcher() {
   const navigation = useNavigation();
   const theme = useTheme();
   const [isRefreshing, setIsRefreshing] = useState(false);
-  const normalizedMatches = useMemo(() => {
+  const filteredMatches = useMemo(() => {
     if (!user?.match) return matches;
     return matches.filter(m => String(m._id) !== String(user.match._id));
   }, [user?.match, matches]);
@@ -40,23 +50,45 @@ export default function Matcher() {
   }
 
   function openMatchCreator() {
-    displaySheet(<MatchCreator onClose={hideSheet} />, '70%');
+    displaySheet(<MatchCreator onClose={hideSheet} />, '75%');
   }
 
   return (
-    <View
-      style={{
-        backgroundColor: theme.colors.background,
-        paddingBottom: user?.match ? 150 : 0,
-      }}>
-      {user?.match && (
-        <MatchCard match={user.match} onPress={selectMatch(user.match)} />
-      )}
+    <SafeAreaView style={{flex: 1, backgroundColor: theme.colors.background}}>
+      <Header>
+        <Account />
+      </Header>
+
+      <View
+        keyboardShouldPersistTaps="handled"
+        style={{
+          paddingLeft: 16,
+          paddingRight: 16,
+          paddingBottom: 8,
+        }}>
+        <View style={{flexDirection: 'row'}}>
+          <View style={{flex: 1, paddingRight: 8}}>
+            <Searchbar
+              style={{
+                backgroundColor: '#FFF',
+                borderWidth: 1,
+                borderColor: theme.colors.secondary,
+              }}
+              placeholder="Search match..."
+            />
+            <HelperText>By name, provider, address, owner</HelperText>
+          </View>
+          <IconButton mode="contained" icon="filter-variant" />
+        </View>
+      </View>
+
+      <Divider />
+
       <FlatList
         refreshControl={
           <RefreshControl refreshing={isRefreshing} onRefresh={onRefresh} />
         }
-        data={normalizedMatches}
+        data={filteredMatches}
         renderItem={({item}) => (
           <MatchCard match={item} onPress={selectMatch(item)} />
         )}
@@ -78,6 +110,12 @@ export default function Matcher() {
           onPress={openMatchCreator}
         />
       )}
-    </View>
+
+      {user?.match && (
+        <View style={{backgroundColor: theme.colors.primary}}>
+          <MatchCard match={user.match} onPress={selectMatch(user.match)} />
+        </View>
+      )}
+    </SafeAreaView>
   );
 }

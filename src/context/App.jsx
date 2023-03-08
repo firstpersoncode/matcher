@@ -19,7 +19,8 @@ import {
   joinMatch,
   leaveMatch,
   removeParticipant,
-} from '../services/matcher';
+  updateMatchName,
+} from '../services/match';
 import {
   announce,
   fetchMessages,
@@ -390,6 +391,10 @@ function useAppState() {
     await joinMatch(match);
   }
 
+  async function handleUpdateMatchName(name) {
+    await updateMatchName(name);
+  }
+
   async function handleRemoveParticipant(participant) {
     await removeParticipant(participant);
   }
@@ -456,6 +461,7 @@ function useAppState() {
     handleLeaveMatch,
     handleDeleteMatch,
     handleJoinMatch,
+    handleUpdateMatchName,
     handleRemoveParticipant,
     sendMessage,
     saveLastRead,
