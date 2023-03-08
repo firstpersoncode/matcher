@@ -1,6 +1,12 @@
 import {useEffect, useState} from 'react';
-import {FlatList, RefreshControl} from 'react-native';
-import {IconButton, Divider} from 'react-native-paper';
+import {FlatList, RefreshControl, View} from 'react-native';
+import {
+  IconButton,
+  Divider,
+  Searchbar,
+  HelperText,
+  useTheme,
+} from 'react-native-paper';
 
 import {useAppContext} from 'src/context/App';
 
@@ -8,6 +14,7 @@ import ProviderCard from './ProviderCard';
 
 export default function FormProvider({onChangeForm, setStep}) {
   const {providers, getProviders} = useAppContext();
+  const theme = useTheme();
   const [isRefreshing, setIsRefreshing] = useState(false);
 
   useEffect(() => {
@@ -41,7 +48,29 @@ export default function FormProvider({onChangeForm, setStep}) {
 
   return (
     <>
-      <IconButton icon="arrow-left" onPress={onBack} />
+      <View
+        keyboardShouldPersistTaps="handled"
+        style={{
+          paddingRight: 16,
+          paddingTop: 16,
+          paddingBottom: 8,
+        }}>
+        <View style={{flexDirection: 'row'}}>
+          <IconButton icon="arrow-left" onPress={onBack} />
+          <View style={{flex: 1, paddingRight: 8}}>
+            <Searchbar
+              style={{
+                backgroundColor: '#FFF',
+                borderWidth: 1,
+                borderColor: theme.colors.secondary,
+              }}
+              placeholder="Search Provider..."
+            />
+            <HelperText>By name, address</HelperText>
+          </View>
+          <IconButton mode="contained" icon="filter-variant" />
+        </View>
+      </View>
       <Divider />
       <FlatList
         data={providers}
