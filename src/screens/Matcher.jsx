@@ -24,10 +24,10 @@ export default function Matcher() {
   const navigation = useNavigation();
   const theme = useTheme();
   const [isRefreshing, setIsRefreshing] = useState(false);
-  const filteredMatches = useMemo(() => {
-    if (!user?.match) return matches;
-    return matches.filter(m => String(m._id) !== String(user.match._id));
-  }, [user?.match, matches]);
+  // const filteredMatches = useMemo(() => {
+  //   if (!user?.match) return matches;
+  //   return matches.filter(m => String(m._id) !== String(user.match._id));
+  // }, [user?.match, matches]);
 
   useEffect(() => {
     if (user?.match?._id)
@@ -88,7 +88,7 @@ export default function Matcher() {
         refreshControl={
           <RefreshControl refreshing={isRefreshing} onRefresh={onRefresh} />
         }
-        data={filteredMatches}
+        data={matches}
         renderItem={({item}) => (
           <MatchCard match={item} onPress={selectMatch(item)} />
         )}
@@ -113,7 +113,11 @@ export default function Matcher() {
 
       {user?.match && (
         <View style={{backgroundColor: theme.colors.primary}}>
-          <MatchCard match={user.match} onPress={selectMatch(user.match)} />
+          <MatchCard
+            mini
+            match={user.match}
+            onPress={selectMatch(user.match)}
+          />
         </View>
       )}
     </SafeAreaView>

@@ -15,7 +15,7 @@ import {format} from 'date-fns';
 import {useAppContext} from 'src/context/App';
 import Map from './Map';
 
-export default function MatchCard({match, onPress}) {
+export default function MatchCard({mini = false, match, onPress}) {
   const {user, unreads} = useAppContext();
   const theme = useTheme();
   const [visibleMap, setVisibleMap] = useState(false);
@@ -69,19 +69,19 @@ export default function MatchCard({match, onPress}) {
                   fontWeight: 'bold',
                   marginBottom: 8,
                 }}
-                variant={isParticipant ? 'labelLarge' : 'titleLarge'}>
+                variant={mini ? 'labelLarge' : 'titleLarge'}>
                 {match.name}
               </Text>
-              <Text variant={isParticipant ? 'labelSmall' : 'titleMedium'}>
+              <Text variant={mini ? 'labelSmall' : 'titleMedium'}>
                 {match.provider.name}
               </Text>
-              {!isParticipant && (
+              {!mini && (
                 <Text variant="bodyMedium">{match.provider.address}</Text>
               )}
             </View>
 
             <View>
-              {!isParticipant && (
+              {!mini && (
                 <Button
                   mode="contained"
                   icon="map-marker"
@@ -98,7 +98,7 @@ export default function MatchCard({match, onPress}) {
           </View>
         </Card.Content>
       </TouchableRipple>
-      {!isParticipant && (
+      {!mini && (
         <>
           {visibleMap && (
             <Map
