@@ -1,6 +1,7 @@
 import {createMaterialTopTabNavigator} from '@react-navigation/material-top-tabs';
 import {createNativeStackNavigator} from '@react-navigation/native-stack';
 
+import {useAppContext} from 'src/context/App';
 import Matcher from './Matcher';
 import Match from './Match';
 import Account from './Account';
@@ -9,10 +10,12 @@ const Tab = createMaterialTopTabNavigator();
 const Stack = createNativeStackNavigator();
 
 export default function Screens() {
+  const {user} = useAppContext();
+
   return (
-    <Tab.Navigator tabBar={() => null}>
+    <Tab.Navigator tabBar={() => null} initialRouteName="Matcher">
       <Tab.Screen name="Root" component={Root} />
-      <Tab.Screen name="Account" component={Account} />
+      {user && <Tab.Screen name="Account" component={Account} />}
     </Tab.Navigator>
   );
 }

@@ -1,4 +1,4 @@
-import {useState, createContext, useContext, useEffect} from 'react';
+import {useState, createContext, useContext, useEffect, useMemo} from 'react';
 import Geolocation from '@react-native-community/geolocation';
 import io from 'socket.io-client';
 import Config from 'react-native-config';
@@ -40,6 +40,7 @@ const appContext = {
   ready: false,
   online: false,
   user: null,
+  match: null,
   matches: [],
   providers: [],
   messages: [],
@@ -48,6 +49,10 @@ const appContext = {
 
 function useAppState() {
   const [ctx, setContext] = useState(appContext);
+  const selectedMatch = useMemo(
+    () => ctx.matches.find(m => String(m._id) === String(ctx.match?._id)),
+    [ctx.match?._id, ctx.matches],
+  );
 
   useEffect(() => {
     setContext(v => ({...v, ready: true}));
@@ -139,20 +144,21 @@ function useAppState() {
             vibrate: true, // (optional) default: true. Creates the default vibration pattern if true.
           },
           created => {
-            if (created)
-              PushNotification.localNotification({
-                channelId,
-                title: 'Welcome back!', // (optional)
-                message: 'Where have you been!?', // (required)
-              });
+            // if (created)
+            //   PushNotification.localNotification({
+            //     channelId,
+            //     title: 'Welcome back!', // (optional)
+            //     message: 'Where have you been!?', // (required)
+            //   });
           },
         );
-      } else
-        PushNotification.localNotification({
-          channelId,
-          title: 'Welcome back!', // (optional)
-          message: 'Where have you been!?', // (required)
-        });
+      }
+      // else
+      //   PushNotification.localNotification({
+      //     channelId,
+      //     title: 'Welcome back!', // (optional)
+      //     message: 'Where have you been!?', // (required)
+      //   });
     });
   }
 
@@ -397,6 +403,10 @@ function useAppState() {
     setContext(v => ({...v, user: null}));
   }
 
+  function selectMatch(match) {
+    setContext(v => ({...v, match}));
+  }
+
   async function getProviders() {
     const providers = await fetchProviders();
     setContext(v => ({...v, providers}));
@@ -472,11 +482,11 @@ function useAppState() {
         m => String(m._id) === String(messageId),
       );
 
-      if (index !== -1) currMessages = currMessages.slice(index);
+      if (index !== -1) currMessages = currMessages.slice(index + 1);
 
       return {
         ...v,
-        unreads: currMessages.length - 1,
+        unreads: currMessages.length,
       };
     });
   }
@@ -491,10 +501,12 @@ function useAppState() {
 
   return {
     ...ctx,
+    match: selectedMatch,
     init,
     handleSignIn,
     handleSignUp,
     handleSignOut,
+    selectMatch,
     getProviders,
     handleCreateMatch,
     handleLeaveMatch,

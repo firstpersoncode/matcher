@@ -1,24 +1,23 @@
 import {useEffect, useState} from 'react';
-import {FlatList, RefreshControl, View} from 'react-native';
-import {useSheetRouter} from 'react-native-actions-sheet';
+import {View, RefreshControl, FlatList} from 'react-native';
 import {
-  IconButton,
   Divider,
-  Searchbar,
   HelperText,
+  IconButton,
+  Searchbar,
   useTheme,
 } from 'react-native-paper';
+import {useSheetRouter} from 'react-native-actions-sheet';
 
 import {useAppContext} from 'src/context/App';
 import {useSheetContext} from 'src/context/Sheet';
+import ProviderCard from 'src/components/ProviderCard';
 
-import ProviderCard from './ProviderCard';
-
-export default function FormProvider() {
+export default function EditProvider() {
   const {providers, getProviders} = useAppContext();
   const {setSheetState} = useSheetContext();
-  const route = useSheetRouter();
   const theme = useTheme();
+  const route = useSheetRouter();
   const [isRefreshing, setIsRefreshing] = useState(false);
 
   useEffect(() => {
@@ -31,10 +30,6 @@ export default function FormProvider() {
     } catch (err) {
       console.error(err.message || err);
     }
-  }
-
-  function onBack() {
-    route.goBack();
   }
 
   async function onRefresh() {
@@ -51,16 +46,16 @@ export default function FormProvider() {
   }
 
   return (
-    <>
+    <View style={{height: '100%'}}>
       <View
         keyboardShouldPersistTaps="handled"
         style={{
+          paddingLeft: 16,
           paddingRight: 16,
           paddingTop: 16,
           paddingBottom: 8,
         }}>
         <View style={{flexDirection: 'row'}}>
-          <IconButton icon="arrow-left" onPress={onBack} />
           <View style={{flex: 1, paddingRight: 8}}>
             <Searchbar
               style={{
@@ -86,6 +81,6 @@ export default function FormProvider() {
           <RefreshControl refreshing={isRefreshing} onRefresh={onRefresh} />
         }
       />
-    </>
+    </View>
   );
 }

@@ -1,12 +1,12 @@
 import {useCallback, useMemo, useRef, useState} from 'react';
-import {ScrollView, View} from 'react-native';
+import {View, ScrollView} from 'react-native';
 import {
-  IconButton,
-  useTheme,
-  HelperText,
   Button,
   Divider,
+  HelperText,
+  IconButton,
   Text,
+  useTheme,
 } from 'react-native-paper';
 import {
   format,
@@ -15,23 +15,22 @@ import {
   setMinutes,
   startOfDay,
 } from 'date-fns';
-
-import {useAppContext} from 'src/context/App';
-import {DAY_MAPS} from 'src/utils/constants';
-
-import SlotPicker from './SlotPicker';
-import CalendarPicker from './CalendarPicker';
-import {useSheetContext} from 'src/context/Sheet';
 import {useSheetRouter} from 'react-native-actions-sheet';
 
-export default function FormScheduler() {
-  const {matches, handleCreateMatch} = useAppContext();
+import {DAY_MAPS} from 'src/utils/constants';
+import {useAppContext} from 'src/context/App';
+import {useSheetContext} from 'src/context/Sheet';
+import SlotPicker from 'src/components/SlotPicker';
+import CalendarPicker from 'src/components/CalendarPicker';
+
+export default function EditProviderSchedule() {
+  const {matches, handleUpdateMatchProvider} = useAppContext();
   const {state, setSheetState, cleanSheetState, hideSheetRoute} =
     useSheetContext();
   const route = useSheetRouter();
   const theme = useTheme();
   const [availability, setAvailability] = useState(null);
-  const [date, setDate] = useState(new Date());
+  const [date, setDate] = useState(null);
   const [errors, setErrors] = useState({});
   const scrollViewRef = useRef();
   const [calendarLayout, setCalendarLayout] = useState(null);
@@ -159,7 +158,10 @@ export default function FormScheduler() {
 
     setIsSubmitting(true);
     try {
-      await handleCreateMatch({...state, providerRef: state.provider._id});
+      await handleUpdateMatchProvider({
+        ...state,
+        providerRef: state.provider._id,
+      });
       hideSheetRoute();
       cleanSheetState();
     } catch (err) {
@@ -169,7 +171,7 @@ export default function FormScheduler() {
   }
 
   return (
-    <>
+    <View style={{height: '100%'}}>
       <View
         style={{
           paddingTop: 16,
@@ -243,6 +245,6 @@ export default function FormScheduler() {
           Submit
         </Button>
       </ScrollView>
-    </>
+    </View>
   );
 }

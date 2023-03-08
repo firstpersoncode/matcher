@@ -1,27 +1,29 @@
-import {useMemo, useState} from 'react';
+import {useEffect, useMemo, useState} from 'react';
 import {View, FlatList} from 'react-native';
 import {IconButton, Text, TextInput} from 'react-native-paper';
-import {useRoute} from '@react-navigation/native';
+import {useNavigation} from '@react-navigation/native';
 
 import {useAppContext} from 'src/context/App';
 
 import Message from './Message';
 
 export default function MatchChat() {
-  const {user, matches, messages, sendMessage} = useAppContext();
-  const route = useRoute();
+  const {user, match, messages, sendMessage, saveLastRead} = useAppContext();
+  const navigation = useNavigation();
   const [message, setMessage] = useState('');
   const [isSending, setIsSending] = useState(false);
-
-  const match = useMemo(
-    () => matches.find(m => String(m._id) === String(route.params.matchRef)),
-    [matches, route.params.matchRef],
-  );
 
   const isParticipant = useMemo(
     () => user?.match && String(match?._id) === String(user.match._id),
     [user?.match, match?._id],
   );
+
+  useEffect(() => {
+    if (isParticipant) {
+      const unsubscribe = navigation.addListener('focus', saveLastRead);
+      return unsubscribe;
+    }
+  }, [isParticipant, messages, navigation]);
 
   function onTypingMessage(text) {
     setMessage(text);
@@ -34,7 +36,7 @@ export default function MatchChat() {
     try {
       await sendMessage({text: message});
     } catch (err) {
-      console.log(err.message || err);
+      console.error(err.message || err);
     }
     setIsSending(false);
   }

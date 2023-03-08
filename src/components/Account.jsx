@@ -6,14 +6,12 @@ import {IconButton, Menu} from 'react-native-paper';
 import {useAppContext} from 'src/context/App';
 import {useModalContext} from 'src/context/Modal';
 
-import SignInForm from './SignInForm';
-import SignUpForm from './SignUpForm';
+import Auth from './Auth';
 
 export default function Account() {
-  const {user, online, handleSignIn, handleSignUp, handleSignOut} =
-    useAppContext();
+  const {user, online, handleSignOut} = useAppContext();
   const navigation = useNavigation();
-  const {displayModal, hideModal} = useModalContext();
+  const {displayModal} = useModalContext();
   const [visibleMenu, setVisibleMenu] = useState(false);
 
   function toggleVisibleMenu() {
@@ -26,13 +24,7 @@ export default function Account() {
   }
 
   function onPressSignIn() {
-    displayModal(
-      <Auth
-        handleSignIn={handleSignIn}
-        handleSignUp={handleSignUp}
-        hideModal={hideModal}
-      />,
-    );
+    displayModal(<Auth />);
     toggleVisibleMenu();
   }
 
@@ -74,43 +66,5 @@ export default function Account() {
         <Menu.Item onPress={onPressSignIn} title="Sign In" />
       )}
     </Menu>
-  );
-}
-
-function Auth({handleSignIn, handleSignUp, hideModal}) {
-  const [authType, setAuthType] = useState('signin');
-
-  function toggleAuthType(type) {
-    return function () {
-      setAuthType(type);
-    };
-  }
-
-  async function onSignIn(form) {
-    try {
-      await handleSignIn(form);
-      hideModal();
-    } catch (err) {
-      console.error(err.message || err);
-    }
-  }
-
-  async function onSignUp(form) {
-    try {
-      await handleSignUp(form);
-      hideModal();
-    } catch (err) {
-      console.error(err.message || err);
-    }
-  }
-
-  return (
-    <View style={{backgroundColor: '#FFF', padding: 16}}>
-      {authType === 'signin' ? (
-        <SignInForm onSubmit={onSignIn} onSignUp={toggleAuthType('signup')} />
-      ) : (
-        <SignUpForm onSubmit={onSignUp} onSignIn={toggleAuthType('signin')} />
-      )}
-    </View>
   );
 }

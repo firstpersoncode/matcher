@@ -41,14 +41,14 @@ export default function ModalContextProvider({children}) {
         style={{margin: 16, zIndex: 10000}}
         visible={modalContext.visible}
         onDismiss={modalContext.hideModal}>
-        <View
+        {/* <View
           style={{
             backgroundColor: '#fff',
             alignItems: 'flex-end',
           }}>
           <IconButton icon="close" onPress={modalContext.hideModal} />
         </View>
-        <Divider />
+        <Divider /> */}
         {modalContext.content}
       </Modal>
     </ModalContext.Provider>

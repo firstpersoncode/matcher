@@ -1,4 +1,4 @@
-import {useMemo, useState} from 'react';
+import {useMemo} from 'react';
 import {View} from 'react-native';
 import {Button, Text, useTheme} from 'react-native-paper';
 import {useNavigation, useRoute} from '@react-navigation/native';
@@ -6,22 +6,17 @@ import {useNavigation, useRoute} from '@react-navigation/native';
 import {useAppContext} from 'src/context/App';
 import {useModalContext} from 'src/context/Modal';
 import {useSheetContext} from 'src/context/Sheet';
+import Auth from 'src/components/Auth';
 
-import Counter from './Counter';
+import JoinForm from './JoinForm';
 
 export default function MatchActions() {
-  const {user, matches, handleLeaveMatch, handleDeleteMatch, handleJoinMatch} =
+  const {user, match, handleLeaveMatch, handleDeleteMatch, handleJoinMatch} =
     useAppContext();
   const {displayModal, hideModal} = useModalContext();
   const {displaySheet, hideSheet} = useSheetContext();
   const theme = useTheme();
   const navigation = useNavigation();
-  const route = useRoute();
-
-  const match = useMemo(
-    () => matches.find(m => String(m._id) === String(route.params.matchRef)),
-    [matches, route.params.matchRef],
-  );
 
   const isOwner = useMemo(
     () => String(match?.owner._id) === String(user?._id),
@@ -93,8 +88,9 @@ export default function MatchActions() {
   }
 
   function openJoinMatch() {
+    if (!user) return displayModal(<Auth />);
     displaySheet({
-      content: <MatchJoin maxJoined={maxJoined} onSubmit={joinMatch} />,
+      content: <JoinForm maxJoined={maxJoined} onSubmit={joinMatch} />,
     });
   }
 
@@ -135,41 +131,5 @@ export default function MatchActions() {
         </Button>
       )}
     </>
-  );
-}
-
-function MatchJoin({maxJoined, onSubmit}) {
-  const [value, setValue] = useState(1);
-  const [isSubmitting, setIsSubmitting] = useState(false);
-
-  function onCountChange(v) {
-    setValue(v);
-  }
-
-  async function handleSubmit() {
-    setIsSubmitting(true);
-    try {
-      await onSubmit(value);
-    } catch (err) {
-      console.error(err.message || err);
-    }
-    setIsSubmitting(false);
-  }
-
-  return (
-    <View style={{padding: 16}}>
-      <Counter
-        label="Player"
-        min={1}
-        max={maxJoined}
-        value={value}
-        onDecrement={onCountChange}
-        onIncrement={onCountChange}
-      />
-
-      <Button disabled={isSubmitting} mode="contained" onPress={handleSubmit}>
-        Join
-      </Button>
-    </View>
   );
 }

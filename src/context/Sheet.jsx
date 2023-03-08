@@ -3,7 +3,6 @@ import ActionSheet, {
   registerSheet,
   SheetManager,
 } from 'react-native-actions-sheet';
-import {SafeAreaView} from 'react-native-safe-area-context';
 
 const SHEET_ID = 'global-sheet';
 const SHEET_ROUTE_ID = 'global-sheet-route';
@@ -13,19 +12,17 @@ const sheetContext = {
   content: null,
   routes: [],
   initialRoute: '',
-  height: '50%',
   state: {},
 };
 
 function useSheetState() {
   const [ctx, setContext] = useState(sheetContext);
 
-  function displaySheet({content, height = '50%', state = {}}) {
+  function displaySheet({content, state = {}}) {
     setContext(v => ({
       ...v,
       visible: true,
       content,
-      height,
       state,
     }));
     SheetManager.show(SHEET_ID);
@@ -36,18 +33,12 @@ function useSheetState() {
     setContext(v => ({...v, visible: false, content: null}));
   }
 
-  function displaySheetRoute({
-    routes,
-    initialRoute,
-    height = '50%',
-    state = {},
-  }) {
+  function displaySheetRoute({routes, initialRoute, state = {}}) {
     setContext(v => ({
       ...v,
       visible: true,
       routes,
       initialRoute,
-      height,
       state,
     }));
     SheetManager.show(SHEET_ROUTE_ID);
@@ -99,25 +90,37 @@ export default function SheetContextProvider({children}) {
 }
 
 function Sheet({sheetId}) {
-  const {height, content} = useSheetContext();
+  const {content} = useSheetContext();
 
   return (
-    <ActionSheet id={sheetId} containerStyle={{height}}>
-      <SafeAreaView>{content}</SafeAreaView>
+    <ActionSheet
+      // headerAlwaysVisible={false}
+      // gestureEnabled
+      isModal={false}
+      zIndex={9000}
+      id={sheetId}
+      useBottomSafeAreaPadding
+      drawUnderStatusBar={false}>
+      {content}
     </ActionSheet>
   );
 }
 
 function SheetRoute({sheetId}) {
-  const {height, routes, initialRoute} = useSheetContext();
+  const {routes, initialRoute} = useSheetContext();
 
   return (
     <ActionSheet
+      // headerAlwaysVisible={false}
+      // gestureEnabled
+      isModal={false}
+      zIndex={9000}
       id={sheetId}
-      containerStyle={{height}}
-      enableRouterBackNavigation={true}
+      enableRouterBackNavigation
       routes={routes}
       initialRoute={initialRoute}
+      useBottomSafeAreaPadding
+      drawUnderStatusBar={false}
     />
   );
 }

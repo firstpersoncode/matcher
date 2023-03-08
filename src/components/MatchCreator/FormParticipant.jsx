@@ -1,14 +1,15 @@
-import {useEffect, useState} from 'react';
+import {useEffect, useRef, useState} from 'react';
 import {ScrollView, View} from 'react-native';
 import {useSheetRouter} from 'react-native-actions-sheet';
 import {TextInput, HelperText, Button} from 'react-native-paper';
 import {useSheetContext} from 'src/context/Sheet';
 
-import Counter from './Counter';
+import Counter from 'src/components/Counter';
 
 export default function FormParticipant() {
   const {state, setSheetState} = useSheetContext();
   const route = useSheetRouter();
+  const textInputRef = useRef();
   const [errors, setErrors] = useState({});
 
   function handleChangeName(text) {
@@ -51,15 +52,18 @@ export default function FormParticipant() {
     if (!isValid) return;
 
     route.navigate('provider');
+    textInputRef.current?.blur();
   }
 
   return (
     <ScrollView style={{padding: 16}} keyboardShouldPersistTaps="handled">
       <TextInput
+        ref={textInputRef}
         label="Name"
         mode="outlined"
         value={state.name}
         onChangeText={handleChangeName}
+        onSubmitEditing={handleSubmit}
         maxLength={50}
         right={<TextInput.Affix text={`${String(state.name.length)}/50`} />}
         error={Boolean(errors.name)}
