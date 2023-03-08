@@ -1,11 +1,13 @@
-import {useMemo} from 'react';
+import {useEffect, useMemo, useRef, useState} from 'react';
 import {View, ScrollView, Linking} from 'react-native';
 import {
   Button,
   Card,
   Divider,
+  HelperText,
   IconButton,
   Text,
+  TextInput,
   useTheme,
 } from 'react-native-paper';
 import Hyperlink from 'react-native-hyperlink';
@@ -15,10 +17,12 @@ import {format} from 'date-fns';
 import {useAppContext} from 'src/context/App';
 import {useModalContext} from 'src/context/Modal';
 import Map from './Map';
+import {useSheetContext} from 'src/context/Sheet';
 
 export default function MatchInfo() {
   const {user, matches} = useAppContext();
   const {displayModal} = useModalContext();
+  const {displaySheet} = useSheetContext();
 
   const theme = useTheme();
   const route = useRoute();
@@ -44,6 +48,10 @@ export default function MatchInfo() {
     );
   }
 
+  function onEditName() {
+    displaySheet(<EditName match={match} />, '30%');
+  }
+
   return (
     <ScrollView style={{flex: 1}}>
       <View
@@ -54,12 +62,19 @@ export default function MatchInfo() {
           justifyContent: 'space-between',
           alignItems: 'flex-start',
           backgroundColor: theme.colors.secondaryContainer,
+          flexWrap: 'wrap',
         }}>
-        <View style={{flexDirection: 'row', alignItems: 'flex-start'}}>
+        <View
+          style={{
+            flexDirection: 'row',
+            alignItems: 'flex-start',
+            flexWrap: 'wrap',
+            flex: 1,
+          }}>
           <Text variant="headlineLarge" style={{fontWeight: 'bold'}}>
             {match.name}
           </Text>
-          {isOwner && <IconButton icon="pencil" />}
+          {isOwner && <IconButton onPress={onEditName} icon="pencil" />}
         </View>
         <Button
           mode="contained"
@@ -156,5 +171,74 @@ export default function MatchInfo() {
         ))}
       </View>
     </ScrollView>
+  );
+}
+
+function EditName({match}) {
+  const {handleUpdateMatchName} = useAppContext();
+  const {hideSheet} = useSheetContext();
+  const inputRef = useRef();
+  const timeoutRef = useRef();
+  const [name, setName] = useState(match.name);
+  const [isSubmitting, setIsSubmitting] = useState(false);
+
+  useEffect(() => {
+    if (timeoutRef.current) clearTimeout(timeoutRef.current);
+    timeoutRef.current = setTimeout(() => {
+      inputRef.current?.focus();
+    }, 50);
+    return () => {
+      timeoutRef.current && clearTimeout(timeoutRef.current);
+      inputRef.current?.blur();
+    };
+  }, []);
+
+  function onChange(text) {
+    setName(text);
+  }
+
+  async function onSubmit() {
+    if (!Boolean(name.trim())) return;
+
+    if (name === match.name) {
+      inputRef.current?.blur();
+      hideSheet();
+    }
+
+    setIsSubmitting(true);
+    try {
+      await handleUpdateMatchName({name});
+      inputRef.current?.blur();
+      hideSheet();
+    } catch (err) {
+      console.error(err.message || err);
+    }
+    setIsSubmitting(false);
+  }
+
+  return (
+    <View style={{padding: 16}}>
+      <TextInput
+        ref={inputRef}
+        mode="outlined"
+        value={name}
+        onChangeText={onChange}
+        onSubmitEditing={onSubmit}
+        maxLength={50}
+        right={<TextInput.Affix text={`${String(name.length)}/50`} />}
+        error={!Boolean(name)}
+      />
+      <HelperText type="error" visible={!Boolean(name)}>
+        Required
+      </HelperText>
+
+      <Button
+        // style={{marginTop: 16}}
+        disabled={isSubmitting}
+        mode="contained"
+        onPress={onSubmit}>
+        Update
+      </Button>
+    </View>
   );
 }

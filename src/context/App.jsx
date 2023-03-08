@@ -303,6 +303,30 @@ function useAppState() {
           };
         });
         break;
+      case 'match-update':
+        setContext(v => {
+          let currUser = v.user;
+          if (currUser?.match) {
+            let isParticipant = data.participants.find(
+              p => String(p.participant._id) === String(currUser._id),
+            );
+            if (isParticipant) {
+              currUser.match = {...currUser.match, ...data};
+            }
+          }
+
+          return {
+            ...v,
+            matches: [...v.matches].map(m => {
+              if (String(m._id) === String(data._id)) {
+                m = {...m, ...data};
+              }
+              return m;
+            }),
+            user: currUser,
+          };
+        });
+        break;
       case 'message-announce':
         setContext(v => ({
           ...v,
