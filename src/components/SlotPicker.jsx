@@ -166,12 +166,6 @@ export default function SlotPicker({
 
   return (
     <View style={{flex: 1}}>
-      {selectedDate && (
-        <Text variant="titleLarge" style={{marginBottom: 16}}>
-          {format(selectedDate, 'dd MMM yyyy')}
-        </Text>
-      )}
-
       <View style={{position: 'relative', flex: 1}}>
         {hours.map(hour =>
           hourSlots.map((slot, i) => {
