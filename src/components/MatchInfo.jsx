@@ -71,10 +71,12 @@ export default function MatchInfo() {
             flexWrap: 'wrap',
             flex: 1,
           }}>
-          <Text variant="headlineLarge" style={{fontWeight: 'bold'}}>
+          {isOwner && (
+            <IconButton size={18} onPress={onEditName} icon="pencil" />
+          )}
+          <Text variant="headlineLarge" style={{fontWeight: 'bold', flex: 1}}>
             {match.name}
           </Text>
-          {isOwner && <IconButton onPress={onEditName} icon="pencil" />}
         </View>
         <Button
           mode="contained"
@@ -96,6 +98,7 @@ export default function MatchInfo() {
           alignItems: 'flex-start',
           backgroundColor: theme.colors.secondaryContainer,
         }}>
+        {isOwner && <IconButton size={18} icon="pencil" />}
         <View style={{flex: 1}}>
           <Text
             variant="titleLarge"
@@ -106,6 +109,7 @@ export default function MatchInfo() {
             {match.provider.address}
           </Text>
           <View style={{flexDirection: 'row', alignItems: 'center'}}>
+            {isOwner && <IconButton size={18} icon="pencil" />}
             <IconButton icon="calendar-check" />
             <Text
               variant="titleMedium"
@@ -116,9 +120,9 @@ export default function MatchInfo() {
               }}>
               {format(new Date(match.start), 'iiii, do MMMM yyyy')}
             </Text>
-            {isOwner && <IconButton icon="pencil" />}
           </View>
           <View style={{flexDirection: 'row', alignItems: 'center'}}>
+            {isOwner && <IconButton size={18} icon="pencil" />}
             <IconButton icon="clock-outline" />
             <Text
               variant="titleMedium"
@@ -130,10 +134,8 @@ export default function MatchInfo() {
               {format(new Date(match.start), 'HH:mm')} -{' '}
               {format(new Date(match.end), 'HH:mm')}
             </Text>
-            {isOwner && <IconButton icon="pencil" />}
           </View>
         </View>
-        {isOwner && <IconButton icon="pencil" />}
       </View>
 
       <View style={{marginBottom: 32, position: 'relative'}}>
