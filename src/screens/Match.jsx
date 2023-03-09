@@ -47,19 +47,7 @@ export default function Match() {
 
   return (
     <View style={{flex: 1, backgroundColor: theme.colors.background}}>
-      <Header
-        back
-        logo={
-          <Pressable
-            style={{paddingRight: 10}}
-            onPress={() => navigation.goBack()}>
-            <Image
-              resizeMode="contain"
-              style={{width: 35}}
-              source={require('../assets/logo.png')}
-            />
-          </Pressable>
-        }>
+      <Header back disableTitle>
         <View style={{paddingRight: 16}}>
           <MatchActions />
         </View>
@@ -81,7 +69,7 @@ export default function Match() {
           },
         }}>
         <Tab.Screen
-          name="Info"
+          name="MatchInfo"
           options={{
             tabBarShowLabel: false,
             tabBarIcon: ({color}) => (
@@ -98,7 +86,7 @@ export default function Match() {
           component={MatchInfo}
         />
         <Tab.Screen
-          name="Participant"
+          name="MatchParticipant"
           options={{
             title: `${joinedCount} / ${match.count}`,
             tabBarIcon: ({color}) => (
@@ -117,7 +105,7 @@ export default function Match() {
           component={MatchParticipant}
         />
         <Tab.Screen
-          name="chat"
+          name="MatchChat"
           options={{
             tabBarShowLabel: false,
             tabBarIcon: ({color}) => (
