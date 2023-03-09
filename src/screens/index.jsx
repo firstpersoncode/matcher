@@ -13,7 +13,7 @@ export default function Screens() {
   const {user} = useAppContext();
 
   return (
-    <Tab.Navigator tabBar={() => null} initialRouteName="Matcher">
+    <Tab.Navigator tabBar={() => null} initialRouteName="Root">
       <Tab.Screen name="Root" component={Root} />
       {user && <Tab.Screen name="Account" component={Account} />}
     </Tab.Navigator>
