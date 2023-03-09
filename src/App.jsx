@@ -13,13 +13,13 @@ export default function App() {
     <NavigationContainer>
       <PaperProvider theme={theme}>
         <AppContextProvider>
-          <ModalContextProvider>
-            <SheetContextProvider>
+          <SheetContextProvider>
+            <ModalContextProvider>
               <SheetProvider>
                 <Screens />
               </SheetProvider>
-            </SheetContextProvider>
-          </ModalContextProvider>
+            </ModalContextProvider>
+          </SheetContextProvider>
         </AppContextProvider>
       </PaperProvider>
     </NavigationContainer>

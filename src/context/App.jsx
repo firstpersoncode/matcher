@@ -39,6 +39,7 @@ let socketClient;
 const appContext = {
   ready: false,
   online: false,
+  coordinates: [],
   user: null,
   match: null,
   matches: [],
@@ -122,6 +123,7 @@ function useAppState() {
         setContext(v => ({
           ...v,
           user,
+          coordinates,
           matches,
         }));
       },

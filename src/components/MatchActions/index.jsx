@@ -40,21 +40,23 @@ export default function MatchActions() {
   );
 
   function onLeaveMatch() {
-    displayModal(
-      <View style={{backgroundColor: '#FFF', padding: 16}}>
-        <Text
-          style={{marginBottom: 16, textAlign: 'center'}}
-          variant="titleLarge">
-          Are you sure?
-        </Text>
-        <Button
-          onPress={leaveMatch}
-          textColor="#FFF"
-          style={{backgroundColor: theme.colors.error}}>
-          Leave
-        </Button>
-      </View>,
-    );
+    displayModal({
+      content: (
+        <View style={{backgroundColor: '#FFF', padding: 16}}>
+          <Text
+            style={{marginBottom: 16, textAlign: 'center'}}
+            variant="titleLarge">
+            Are you sure?
+          </Text>
+          <Button
+            onPress={leaveMatch}
+            textColor="#FFF"
+            style={{backgroundColor: theme.colors.error}}>
+            Leave
+          </Button>
+        </View>
+      ),
+    });
   }
 
   async function leaveMatch() {
@@ -64,21 +66,23 @@ export default function MatchActions() {
   }
 
   function onDeleteMatch() {
-    displayModal(
-      <View style={{backgroundColor: '#FFF', padding: 16}}>
-        <Text
-          style={{marginBottom: 16, textAlign: 'center'}}
-          variant="titleLarge">
-          Are you sure?
-        </Text>
-        <Button
-          onPress={deleteMatch}
-          textColor="#FFF"
-          style={{backgroundColor: theme.colors.error}}>
-          Delete
-        </Button>
-      </View>,
-    );
+    displayModal({
+      content: (
+        <View style={{backgroundColor: '#FFF', padding: 16}}>
+          <Text
+            style={{marginBottom: 16, textAlign: 'center'}}
+            variant="titleLarge">
+            Are you sure?
+          </Text>
+          <Button
+            onPress={deleteMatch}
+            textColor="#FFF"
+            style={{backgroundColor: theme.colors.error}}>
+            Delete
+          </Button>
+        </View>
+      ),
+    });
   }
 
   async function deleteMatch() {
@@ -88,7 +92,7 @@ export default function MatchActions() {
   }
 
   function openJoinMatch() {
-    if (!user) return displayModal(<Auth />);
+    if (!user) return displayModal({content: <Auth />});
     displaySheet({
       content: <JoinForm maxJoined={maxJoined} onSubmit={joinMatch} />,
     });
@@ -122,7 +126,11 @@ export default function MatchActions() {
         </Button>
       )}
       {!isParticipant && maxJoined > 0 && !user?.match && (
-        <Button mode="contained" icon="handshake" onPress={openJoinMatch}>
+        <Button
+          style={{backgroundColor: theme.colors.primary}}
+          mode="contained"
+          icon="handshake"
+          onPress={openJoinMatch}>
           Join
         </Button>
       )}

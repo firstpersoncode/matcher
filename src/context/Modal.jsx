@@ -1,21 +1,22 @@
 import {createContext, useContext, useState} from 'react';
 import {View} from 'react-native';
-import {Divider, IconButton, Modal} from 'react-native-paper';
+import {Divider, IconButton, Modal, Portal} from 'react-native-paper';
 
 const modalContext = {
   visible: false,
   content: null,
+  portal: false,
 };
 
 function useModalState() {
   const [ctx, setContext] = useState(modalContext);
 
-  function displayModal(content) {
-    setContext({visible: true, content});
+  function displayModal({content, portal = false}) {
+    setContext({visible: !portal, portal, content});
   }
 
   function hideModal() {
-    setContext({visible: false, content: null});
+    setContext({visible: false, portal: false, content: null});
   }
 
   return {
@@ -37,20 +38,39 @@ export default function ModalContextProvider({children}) {
   return (
     <ModalContext.Provider value={modalContext}>
       {children}
-      <Modal
-        style={{margin: 16, zIndex: 10000}}
-        visible={modalContext.visible}
-        onDismiss={modalContext.hideModal}>
-        {/* <View
-          style={{
-            backgroundColor: '#fff',
-            alignItems: 'flex-end',
-          }}>
-          <IconButton icon="close" onPress={modalContext.hideModal} />
-        </View>
-        <Divider /> */}
-        {modalContext.content}
-      </Modal>
+      <Dialog />
     </ModalContext.Provider>
+  );
+}
+
+function Dialog() {
+  const {visible, hideModal, portal, content} = useModalContext();
+
+  return (
+    <>
+      <DialogModal visible={visible} content={content} hideModal={hideModal} />
+      <Portal>
+        <DialogModal visible={portal} content={content} hideModal={hideModal} />
+      </Portal>
+    </>
+  );
+}
+
+function DialogModal({visible, content, hideModal}) {
+  return (
+    <Modal
+      contentContainerStyle={{margin: 16, zIndex: 99999}}
+      visible={visible}
+      onDismiss={hideModal}>
+      <View
+        style={{
+          backgroundColor: '#fff',
+          alignItems: 'flex-end',
+        }}>
+        <IconButton size={20} icon="close" onPress={hideModal} />
+      </View>
+      <Divider />
+      {content}
+    </Modal>
   );
 }

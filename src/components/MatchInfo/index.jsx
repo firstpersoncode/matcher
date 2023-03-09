@@ -33,15 +33,17 @@ export default function MatchInfo() {
   );
 
   function showMap() {
-    displayModal(
-      <Map
-        liteMode={false}
-        title={match?.provider.name}
-        description={match?.provider.address}
-        center={match?.location.coordinates.slice().reverse()}
-        height={400}
-      />,
-    );
+    displayModal({
+      content: (
+        <Map
+          liteMode={false}
+          title={match?.provider.name}
+          description={match?.provider.address}
+          center={match?.location.coordinates.slice().reverse()}
+          height={450}
+        />
+      ),
+    });
   }
 
   function onEditName() {
@@ -70,7 +72,7 @@ export default function MatchInfo() {
   }
 
   return (
-    <ScrollView style={{flex: 1}}>
+    <ScrollView style={{flex: 1, backgroundColor: theme.colors.background}}>
       <View
         style={{
           padding: 16,
@@ -103,9 +105,14 @@ export default function MatchInfo() {
         <Button
           mode="contained"
           icon="map-marker"
-          style={{marginBottom: 8}}
+          style={{
+            marginBottom: 8,
+            backgroundColor: theme.colors.tertiaryContainer,
+          }}
           onPress={showMap}>
-          ~ {Math.floor(match?.distance / 1000)} km
+          <Text variant="labelLarge">
+            ~ {Math.floor(match?.distance / 1000)} km
+          </Text>
         </Button>
       </View>
 

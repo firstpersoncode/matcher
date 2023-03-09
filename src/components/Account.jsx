@@ -24,7 +24,7 @@ export default function Account() {
   }
 
   function onPressSignIn() {
-    displayModal(<Auth />);
+    displayModal({content: <Auth />});
     toggleVisibleMenu();
   }
 

@@ -94,10 +94,9 @@ function Sheet({sheetId}) {
 
   return (
     <ActionSheet
-      // headerAlwaysVisible={false}
-      // gestureEnabled
+      gestureEnabled
       isModal={false}
-      zIndex={9000}
+      zIndex={0}
       id={sheetId}
       useBottomSafeAreaPadding
       drawUnderStatusBar={false}>
@@ -111,10 +110,9 @@ function SheetRoute({sheetId}) {
 
   return (
     <ActionSheet
-      // headerAlwaysVisible={false}
-      // gestureEnabled
+      gestureEnabled
       isModal={false}
-      zIndex={9000}
+      zIndex={0}
       id={sheetId}
       enableRouterBackNavigation
       routes={routes}
