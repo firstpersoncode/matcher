@@ -33,7 +33,11 @@ export default function JoinForm({maxJoined, onSubmit}) {
         onIncrement={onCountChange}
       />
 
-      <Button disabled={isSubmitting} mode="contained" onPress={handleSubmit}>
+      <Button
+        style={{marginTop: 16}}
+        disabled={isSubmitting}
+        mode="contained"
+        onPress={handleSubmit}>
         Join
       </Button>
     </View>

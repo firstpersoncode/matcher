@@ -29,11 +29,7 @@ export default function Counter({
   }
 
   return (
-    <Card
-      style={{
-        padding: 16,
-        marginBottom: 16,
-      }}>
+    <Card style={{padding: 16}}>
       <View
         style={{
           flexDirection: 'row',
