@@ -48,9 +48,10 @@ export default function Match() {
   return (
     <View style={{flex: 1, backgroundColor: theme.colors.background}}>
       <Header
+        back
         logo={
           <Pressable
-            style={{paddingLeft: 8, paddingRight: 10}}
+            style={{paddingRight: 10}}
             onPress={() => navigation.goBack()}>
             <Image
               resizeMode="contain"
@@ -65,9 +66,14 @@ export default function Match() {
       </Header>
       <Divider />
       <Tab.Navigator
+        tabBarPosition="bottom"
         screenOptions={{
           lazy: true,
-          tabBarIndicatorStyle: {backgroundColor: theme.colors.primary},
+          tabBarIndicatorStyle: {
+            backgroundColor: theme.colors.primary,
+            bottom: 'auto',
+            top: 0,
+          },
           tabBarStyle: {backgroundColor: theme.colors.background},
           tabBarItemStyle: {
             flexDirection: 'row',
