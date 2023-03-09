@@ -179,7 +179,7 @@ export default function EditProviderSchedule() {
           flexDirection: 'row',
           alignItems: 'center',
         }}>
-        <IconButton icon="arrow-left" onPress={onBack} />
+        <IconButton icon="chevron-left" onPress={onBack} />
         {date && (
           <Text variant="titleLarge">
             {format(new Date(date), 'dd MMM yyyy')}
