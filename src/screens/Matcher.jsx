@@ -180,7 +180,7 @@ export default function Matcher() {
           </View>
         </View>
 
-        <View style={{flexDirection: 'row', justifyContent: 'flex-end'}}>
+        <View style={{flexDirection: 'row'}}>
           {filter.date && (
             <Chip
               icon="calendar"
