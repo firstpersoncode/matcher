@@ -60,7 +60,7 @@ export default function FormProvider() {
           paddingBottom: 8,
         }}>
         <View style={{flexDirection: 'row'}}>
-          <IconButton icon="arrow-left" onPress={onBack} />
+          <IconButton icon="chevron-left" onPress={onBack} />
           <View style={{flex: 1, paddingRight: 8}}>
             <Searchbar
               style={{

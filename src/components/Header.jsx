@@ -7,7 +7,7 @@ export default function Header({
   title,
   disableTitle = false,
   back,
-  backIcon = 'arrow-left',
+  backIcon = 'chevron-left',
   children,
 }) {
   const navigation = useNavigation();
@@ -18,7 +18,13 @@ export default function Header({
     <>
       <Appbar.Header style={{backgroundColor: theme.colors.background}}>
         <View style={{flex: 1, flexDirection: 'row', alignItems: 'center'}}>
-          {back && <IconButton icon={backIcon} onPress={navigation.goBack} />}
+          {back && (
+            <IconButton
+              style={{margin: 0}}
+              icon={backIcon}
+              onPress={navigation.goBack}
+            />
+          )}
           {logo}
           {!disableTitle && (
             <>
