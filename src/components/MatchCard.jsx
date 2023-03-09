@@ -89,7 +89,7 @@ export default function MatchCard({mini = false, match, onPress, onPressMap}) {
 
               {mini && (
                 <Button mode="contained-tonal" icon="account">
-                  <Text variant="labelSmall" style={{color: '#FFF'}}>
+                  <Text variant="labelSmall">
                     {joinedCount} / {match.count}
                   </Text>
                 </Button>
