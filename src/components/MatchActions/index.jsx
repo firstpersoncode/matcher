@@ -121,12 +121,8 @@ export default function MatchActions() {
           Delete
         </Button>
       )}
-      {!isParticipant && (
-        <Button
-          disabled={maxJoined < 1 || Boolean(user?.match)}
-          mode="contained"
-          icon="handshake"
-          onPress={openJoinMatch}>
+      {!isParticipant && maxJoined > 0 && !user?.match && (
+        <Button mode="contained" icon="handshake" onPress={openJoinMatch}>
           Join
         </Button>
       )}
