@@ -1,30 +1,69 @@
 import {useEffect, useMemo, useState} from 'react';
-import {FlatList, RefreshControl, View, Image} from 'react-native';
+import {View, Image, FlatList, RefreshControl} from 'react-native';
 import {
+  Button,
+  Chip,
   Divider,
   HelperText,
   IconButton,
+  ProgressBar,
   Searchbar,
   useTheme,
 } from 'react-native-paper';
 import {useNavigation} from '@react-navigation/native';
 
 import {useAppContext} from 'src/context/App';
+import {useModalContext} from 'src/context/Modal';
 import Header from 'src/components/Header';
 import Account from 'src/components/Account';
+import MatcherCreator from 'src/components/MatcherCreator';
 import MatchCard from 'src/components/MatchCard';
-import MatcherCreator from 'src/components/MatchCreator';
+import Map from 'src/components/Map';
+import CalendarPicker from 'src/components/CalendarPicker';
+import Counter from 'src/components/Counter';
+import {format, isSameDay, startOfDay} from 'date-fns';
 
 export default function Matcher() {
   const {user, matches, init, selectMatch} = useAppContext();
+  const {displayModal, hideModal} = useModalContext();
   const navigation = useNavigation();
   const theme = useTheme();
   const [isRefreshing, setIsRefreshing] = useState(false);
+  const [search, setSearch] = useState('');
+  const [filter, setFilter] = useState({date: null, count: 0});
 
   const filteredMatches = useMemo(() => {
-    if (!user?.match) return matches;
-    return matches.filter(m => String(m._id) !== String(user.match._id));
-  }, [user?.match, matches]);
+    return matches
+      .filter(m =>
+        !user?.match ? true : String(m._id) !== String(user.match._id),
+      )
+      .filter(m => {
+        if (search) {
+          const searchFields =
+            `${m.name} ${m.provider.name} ${m.provider.address} ${m.owner.name}`.toLowerCase();
+          return searchFields.includes(search.toLowerCase());
+        }
+
+        return true;
+      })
+      .filter(m =>
+        filter.date
+          ? isSameDay(startOfDay(new Date(m.start)), new Date(filter.date))
+          : true,
+      )
+      .filter(m => {
+        if (filter.count > 0) {
+          const totalJoined = m.participants
+            .map(p => p.count)
+            .reduce((sum, a) => sum + a, 0);
+
+          const remainingSlot = m.count - totalJoined;
+          return remainingSlot >= filter.count;
+        }
+
+        return true;
+      });
+  }, [user?.match, matches, search, filter.date, filter.count]);
 
   useEffect(() => {
     if (user?.match?._id) {
@@ -32,6 +71,30 @@ export default function Matcher() {
       navigation.navigate('Match', {name: user.match.name});
     }
   }, [user?.match?._id, user?.match?.name]);
+
+  function onSubmitFilter(f) {
+    setFilter(f);
+    hideModal();
+  }
+
+  function onPressFilter() {
+    displayModal({
+      content: <Filter {...filter} onSubmit={onSubmitFilter} />,
+      portal: true,
+    });
+  }
+
+  function onRemoveFilterDate() {
+    setFilter(v => ({...v, date: null}));
+  }
+
+  function onRemoveFilterCount() {
+    setFilter(v => ({...v, count: 0}));
+  }
+
+  function handleChangeSearch(text) {
+    setSearch(text);
+  }
 
   async function onRefresh() {
     setIsRefreshing(true);
@@ -46,12 +109,30 @@ export default function Matcher() {
     };
   }
 
+  function showMap(match) {
+    return function () {
+      displayModal({
+        content: (
+          <Map
+            liteMode={false}
+            title={match?.provider.name}
+            description={match?.provider.address}
+            center={match?.location.coordinates.slice().reverse()}
+            region={match?.location.coordinates.slice().reverse()}
+            height={450}
+          />
+        ),
+        portal: true,
+      });
+    };
+  }
+
   return (
     <View style={{flex: 1, backgroundColor: theme.colors.background}}>
       <Header
         disableTitle
         logo={
-          <View style={{paddingLeft: 8}}>
+          <View style={{paddingLeft: 16}}>
             <Image
               resizeMode="contain"
               style={{width: 120}}
@@ -69,22 +150,59 @@ export default function Matcher() {
           paddingRight: 16,
           paddingBottom: 8,
         }}>
-        <View style={{flexDirection: 'row'}}>
-          <View style={{flex: 1, paddingRight: 8}}>
+        <View style={{flexDirection: 'row', alignItems: 'flex-start'}}>
+          <IconButton
+            style={{
+              width: 75,
+              margin: 0,
+              backgroundColor: theme.colors.tertiaryContainer,
+            }}
+            size={20}
+            mode="contained"
+            icon="filter-variant"
+            iconColor="#FFF"
+            onPress={onPressFilter}
+          />
+          <View style={{flex: 1, paddingLeft: 8}}>
             <Searchbar
+              clearButtonMode="always"
               style={{
+                height: 40,
                 backgroundColor: '#FFF',
                 borderWidth: 1,
                 borderColor: theme.colors.secondary,
               }}
-              placeholder="Search match..."
+              placeholder="Search..."
+              value={search}
+              onChangeText={handleChangeSearch}
             />
             <HelperText>By name, provider, address, owner</HelperText>
           </View>
-          <IconButton mode="contained" icon="filter-variant" />
+        </View>
+
+        <View style={{flexDirection: 'row', justifyContent: 'flex-end'}}>
+          {filter.date && (
+            <Chip
+              icon="calendar"
+              style={{marginRight: 8}}
+              onPress={onPressFilter}
+              onClose={onRemoveFilterDate}>
+              {format(filter.date, 'dd MMM yyyy')}
+            </Chip>
+          )}
+          {filter.count > 0 && (
+            <Chip
+              icon="account"
+              onPress={onPressFilter}
+              onClose={onRemoveFilterCount}>
+              {'>= '}
+              {filter.count}
+            </Chip>
+          )}
         </View>
       </View>
 
+      {isRefreshing && <ProgressBar indeterminate />}
       <Divider />
 
       <FlatList
@@ -93,15 +211,17 @@ export default function Matcher() {
         }
         data={filteredMatches}
         renderItem={({item}) => (
-          <MatchCard match={item} onPress={navigateToMatch(item)} />
+          <MatchCard
+            match={item}
+            onPress={navigateToMatch(item)}
+            onPressMap={showMap(item)}
+          />
         )}
         keyExtractor={item => item._id}
       />
 
-      {!user?.match && <MatcherCreator />}
-
       {user?.match && (
-        <View style={{backgroundColor: theme.colors.primary}}>
+        <View style={{backgroundColor: theme.colors.secondaryContainer}}>
           <MatchCard
             mini
             match={user.match}
@@ -109,6 +229,46 @@ export default function Matcher() {
           />
         </View>
       )}
+
+      {!user?.match && <MatcherCreator />}
+    </View>
+  );
+}
+
+function Filter({date, count, onSubmit}) {
+  const [selectedDate, setSelectedDate] = useState(date);
+  const [selectedCount, setSelectedCount] = useState(count);
+
+  function onChangeDate(d) {
+    setSelectedDate(d);
+  }
+
+  function onChangeCount(c) {
+    setSelectedCount(c);
+  }
+
+  function handleSubmit() {
+    onSubmit({date: selectedDate, count: selectedCount});
+  }
+
+  return (
+    <View style={{height: '80%', backgroundColor: '#FFF'}}>
+      <CalendarPicker
+        minDate={new Date()}
+        selectedDate={selectedDate}
+        onChangeDate={onChangeDate}
+      />
+      <View style={{padding: 16}}>
+        <Counter
+          value={selectedCount}
+          label="Min Availability"
+          onDecrement={onChangeCount}
+          onIncrement={onChangeCount}
+        />
+        <Button onPress={handleSubmit} style={{marginTop: 16}} mode="contained">
+          Filter
+        </Button>
+      </View>
     </View>
   );
 }
