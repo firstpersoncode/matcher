@@ -1,6 +1,6 @@
 import {useEffect, useMemo, useState} from 'react';
 import {View, FlatList} from 'react-native';
-import {IconButton, Text, TextInput} from 'react-native-paper';
+import {IconButton, Text, TextInput, useTheme} from 'react-native-paper';
 import {useNavigation} from '@react-navigation/native';
 
 import {useAppContext} from 'src/context/App';
@@ -9,6 +9,7 @@ import Message from './Message';
 
 export default function MatchChat() {
   const {user, match, messages, sendMessage, saveLastRead} = useAppContext();
+  const theme = useTheme();
   const navigation = useNavigation();
   const [message, setMessage] = useState('');
   const [isSending, setIsSending] = useState(false);
@@ -49,7 +50,7 @@ export default function MatchChat() {
     );
 
   return (
-    <>
+    <View style={{flex: 1, backgroundColor: theme.colors.background}}>
       <FlatList
         inverted
         data={messages.slice().reverse()}
@@ -81,6 +82,6 @@ export default function MatchChat() {
           onPress={onSubmitMessage}
         />
       </View>
-    </>
+    </View>
   );
 }
