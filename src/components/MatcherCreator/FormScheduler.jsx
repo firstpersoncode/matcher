@@ -45,7 +45,7 @@ export default function FormScheduler() {
   const events = useMemo(
     () =>
       matches
-        .filter(m => String(m.provider._id) !== String(state.provider?._id))
+        .filter(m => String(m.provider._id) === String(state.provider?._id))
         .map(m => ({
           _id: m._id,
           title: m.name,

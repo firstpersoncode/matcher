@@ -183,7 +183,7 @@ export default function FormProvider() {
   );
 }
 
-function Filter({availability, openingHour, onSubmit}) {
+function Filter({availability, onSubmit}) {
   const theme = useTheme();
   const [selectedAvailabilty, setselectedAvailabilty] = useState(availability);
 
