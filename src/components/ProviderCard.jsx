@@ -1,10 +1,7 @@
-import {useState} from 'react';
 import {View} from 'react-native';
 import {
   Button,
   Card,
-  Chip,
-  Divider,
   Text,
   TouchableRipple,
   useTheme,
@@ -12,15 +9,8 @@ import {
 
 import {DAY_MAPS} from 'src/utils/constants';
 
-import Map from './Map';
-
-export default function ProviderCard({provider, onPress}) {
+export default function ProviderCard({provider, onPress, onPressMap}) {
   const theme = useTheme();
-  const [visibleMap, setVisibleMap] = useState(false);
-
-  function toggleVisibleMap() {
-    setVisibleMap(v => !v);
-  }
 
   return (
     <Card style={{margin: 16, backgroundColor: '#FFF'}}>
@@ -31,6 +21,7 @@ export default function ProviderCard({provider, onPress}) {
               flexDirection: 'row',
               justifyContent: 'space-between',
               alignItems: 'flex-start',
+              marginBottom: 16,
             }}>
             <View style={{flex: 1, paddingRight: 16}}>
               <Text
@@ -43,24 +34,13 @@ export default function ProviderCard({provider, onPress}) {
             <Button
               mode="contained"
               icon="map-marker"
-              onPress={toggleVisibleMap}>
-              ~ {Math.floor(provider.distance / 1000)} km
+              style={{backgroundColor: theme.colors.tertiaryContainer}}
+              onPress={onPressMap}>
+              <Text variant="labelSmall">
+                ~ {Math.floor(provider.distance / 1000)} km
+              </Text>
             </Button>
           </View>
-        </Card.Content>
-      </TouchableRipple>
-      {visibleMap && (
-        <Map
-          title={provider.name}
-          description={provider.address}
-          center={provider.location.coordinates.slice().reverse()}
-          height={300}
-          liteMode={false}
-        />
-      )}
-      <Divider />
-      <TouchableRipple onPress={onPress}>
-        <Card.Content style={{padding: 16}}>
           <View
             style={{
               padding: 16,
