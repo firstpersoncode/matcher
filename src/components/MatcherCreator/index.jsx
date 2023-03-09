@@ -15,7 +15,7 @@ export default function MatcherCreator() {
   const theme = useTheme();
 
   function openMatchCreator() {
-    if (!user) return displayModal(<Auth />);
+    if (!user) return displayModal({content: <Auth />});
     displaySheetRoute({
       routes: [
         {
@@ -45,15 +45,16 @@ export default function MatcherCreator() {
 
   return (
     <FAB
+      mode="flat"
       color="#FFF"
       icon="plus"
       style={{
         position: 'absolute',
-        margin: 16,
         right: 0,
         bottom: 0,
         backgroundColor: theme.colors.primary,
         borderRadius: 100,
+        margin: 16,
       }}
       onPress={openMatchCreator}
     />

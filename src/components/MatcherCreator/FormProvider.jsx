@@ -10,12 +10,15 @@ import {
 } from 'react-native-paper';
 
 import {useAppContext} from 'src/context/App';
+import {useModalContext} from 'src/context/Modal';
 import {useSheetContext} from 'src/context/Sheet';
 
 import ProviderCard from 'src/components/ProviderCard';
+import Map from 'src/components/Map';
 
 export default function FormProvider() {
   const {providers, getProviders} = useAppContext();
+  const {displayModal} = useModalContext();
   const {setSheetState} = useSheetContext();
   const route = useSheetRouter();
   const theme = useTheme();
@@ -50,6 +53,24 @@ export default function FormProvider() {
     };
   }
 
+  function showMap(provider) {
+    return function () {
+      displayModal({
+        content: (
+          <Map
+            liteMode={false}
+            title={provider.name}
+            description={provider.address}
+            center={provider.location.coordinates.slice().reverse()}
+            region={provider.location.coordinates.slice().reverse()}
+            height={450}
+          />
+        ),
+        portal: true,
+      });
+    };
+  }
+
   return (
     <View style={{height: '100%'}}>
       <View
@@ -79,7 +100,11 @@ export default function FormProvider() {
       <FlatList
         data={providers}
         renderItem={({item}) => (
-          <ProviderCard provider={item} onPress={selectProvider(item)} />
+          <ProviderCard
+            provider={item}
+            onPress={selectProvider(item)}
+            onPressMap={showMap(item)}
+          />
         )}
         keyExtractor={item => item._id}
         refreshControl={

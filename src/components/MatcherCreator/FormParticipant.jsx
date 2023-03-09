@@ -72,21 +72,25 @@ export default function FormParticipant() {
         {errors.name}
       </HelperText>
 
-      <Counter
-        label="Needed"
-        value={state.count}
-        onDecrement={handleDecrement('count')}
-        onIncrement={handleIncrement('count')}
-        error={errors.count}
-      />
+      <View style={{marginBottom: 16}}>
+        <Counter
+          label="Needed"
+          value={state.count}
+          onDecrement={handleDecrement('count')}
+          onIncrement={handleIncrement('count')}
+          error={errors.count}
+        />
+      </View>
 
-      <Counter
-        label="Available"
-        value={state.pcount}
-        onDecrement={handleDecrement('pcount')}
-        onIncrement={handleIncrement('pcount')}
-        error={errors.pcount}
-      />
+      <View style={{marginBottom: 16}}>
+        <Counter
+          label="Available"
+          value={state.pcount}
+          onDecrement={handleDecrement('pcount')}
+          onIncrement={handleIncrement('pcount')}
+          error={errors.pcount}
+        />
+      </View>
 
       <Button mode="contained" onPress={handleSubmit}>
         Continue
