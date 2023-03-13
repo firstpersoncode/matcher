@@ -20,9 +20,9 @@ export default function MatchParticipant() {
   const {displaySheet} = useSheetContext();
   const theme = useTheme();
 
-  const isUserOwner = useMemo(
-    () => String(match.owner._id) === String(user?._id),
-    [match.owner._id, user?._id],
+  const isParticipant = useMemo(
+    () => String(match._id) === String(user?.match?._id),
+    [user?.match?._id, match],
   );
 
   const joinedCount = useMemo(
@@ -50,7 +50,7 @@ export default function MatchParticipant() {
         />
       ))}
 
-      {isUserOwner && remainingSlot > 0 && (
+      {isParticipant && remainingSlot > 0 && (
         <Button onPress={onInvite} icon="plus">
           Invite
         </Button>
