@@ -57,6 +57,8 @@ export default function SignInForm({onSubmit, onSignIn}) {
         label="Name"
         value={form.name}
         onChangeText={handleChange('name')}
+        maxLength={50}
+        right={<TextInput.Affix text={`${String(form.name.length)}/50`} />}
         error={Boolean(errors.name)}
       />
       <HelperText type="error" visible={Boolean(errors.name)}>

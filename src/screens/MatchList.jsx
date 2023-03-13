@@ -1,4 +1,4 @@
-import {useEffect, useMemo, useState} from 'react';
+import {useMemo, useState} from 'react';
 import {View, Image, FlatList, RefreshControl} from 'react-native';
 import {
   Button,
@@ -23,8 +23,8 @@ import CalendarPicker from 'src/components/CalendarPicker';
 import Counter from 'src/components/Counter';
 import {format, isSameDay, startOfDay} from 'date-fns';
 
-export default function Matcher() {
-  const {user, matches, init, selectMatch} = useAppContext();
+export default function MatchList() {
+  const {user, online, matches, init, selectMatch} = useAppContext();
   const {displayModal, hideModal} = useModalContext();
   const navigation = useNavigation();
   const theme = useTheme();
@@ -33,44 +33,39 @@ export default function Matcher() {
   const [filter, setFilter] = useState({date: null, count: 0});
 
   const filteredMatches = useMemo(() => {
-    return matches
-      .filter(m =>
-        !user?.match ? true : String(m._id) !== String(user.match._id),
-      )
-      .filter(m => {
-        if (search) {
-          const searchFields =
-            `${m.name} ${m.provider.name} ${m.provider.address} ${m.owner.name}`.toLowerCase();
-          return searchFields.includes(search.toLowerCase());
-        }
+    return (
+      matches
+        // .filter(m =>
+        //   !user?.match ? true : String(m._id) !== String(user.match._id),
+        // )
+        .filter(m => {
+          if (search) {
+            const searchFields =
+              `${m.name} ${m.provider.name} ${m.provider.address} ${m.owner.name}`.toLowerCase();
+            return searchFields.includes(search.toLowerCase());
+          }
 
-        return true;
-      })
-      .filter(m =>
-        filter.date
-          ? isSameDay(startOfDay(new Date(m.start)), new Date(filter.date))
-          : true,
-      )
-      .filter(m => {
-        if (filter.count > 0) {
-          const totalJoined = m.participants
-            .map(p => p.count)
-            .reduce((sum, a) => sum + a, 0);
+          return true;
+        })
+        .filter(m =>
+          filter.date
+            ? isSameDay(startOfDay(new Date(m.start)), new Date(filter.date))
+            : true,
+        )
+        .filter(m => {
+          if (filter.count > 0) {
+            const totalJoined = m.participants
+              .map(p => p.count)
+              .reduce((sum, a) => sum + a, 0);
 
-          const remainingSlot = m.count - totalJoined;
-          return remainingSlot >= filter.count;
-        }
+            const remainingSlot = m.count - totalJoined;
+            return remainingSlot >= filter.count;
+          }
 
-        return true;
-      });
+          return true;
+        })
+    );
   }, [user?.match, matches, search, filter.date, filter.count]);
-
-  useEffect(() => {
-    if (user?.match?._id) {
-      selectMatch(user.match);
-      navigation.navigate('Match', {name: user.match.name});
-    }
-  }, [user?.match?._id, user?.match?.name]);
 
   function onSubmitFilter(f) {
     setFilter(f);
@@ -132,16 +127,32 @@ export default function Matcher() {
       <Header
         disableTitle
         logo={
-          <View style={{paddingLeft: 16}}>
+          <View
+            style={{
+              flex: 1,
+              paddingLeft: 16,
+              flexDirection: 'row',
+              alignItems: 'center',
+            }}>
             <Image
               resizeMode="contain"
-              style={{width: 120}}
+              style={{width: 120, height: 60, marginRight: 8}}
               source={require('../assets/matcher-logo.png')}
             />
+            <View
+              style={{
+                width: 10,
+                height: 10,
+                backgroundColor: online
+                  ? theme.colors.primaryContainer
+                  : '#bbb',
+                borderRadius: 50,
+              }}
+            />
           </View>
-        }>
-        <Account />
-      </Header>
+        }
+        action={<Account />}
+      />
 
       <View
         keyboardShouldPersistTaps="handled"
@@ -221,11 +232,17 @@ export default function Matcher() {
       />
 
       {user?.match && (
-        <View style={{backgroundColor: theme.colors.secondaryContainer}}>
+        <View
+          style={{
+            backgroundColor: theme.colors.secondaryContainer,
+            paddingVertical: 8,
+          }}>
           <MatchCard
             mini
-            match={user.match}
-            onPress={navigateToMatch(user.match)}
+            match={matches.find(m => String(m._id) === String(user.match._id))}
+            onPress={navigateToMatch(
+              matches.find(m => String(m._id) === String(user.match._id)),
+            )}
           />
         </View>
       )}
@@ -252,7 +269,7 @@ function Filter({date, count, onSubmit}) {
   }
 
   return (
-    <View style={{height: '80%', backgroundColor: '#FFF'}}>
+    <View style={{backgroundColor: '#FFF'}}>
       <CalendarPicker
         minDate={new Date()}
         selectedDate={selectedDate}

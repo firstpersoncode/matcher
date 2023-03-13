@@ -165,172 +165,169 @@ export default function SlotPicker({
   }
 
   return (
-    <View style={{flex: 1}}>
-      <View style={{position: 'relative', flex: 1}}>
+    <View style={{position: 'relative'}}>
+      {hours.map(hour =>
+        hourSlots.map((slot, i) => {
+          let slotString = `${padNumber(hour)}:${padNumber(slot * step)}`;
+          let isDisabled = disableSlot && disableSlot(slotString);
+
+          return (
+            <View
+              key={i}
+              style={{
+                flexDirection: 'row',
+                height: slotHeight,
+                opacity: isDisabled ? 0.3 : 1,
+              }}>
+              <Text
+                variant="labelSmall"
+                style={{
+                  width: minLeft,
+                  borderTopWidth: 0.3,
+                  borderRightWidth: 0.3,
+                  borderColor: '#ccc',
+                  fontSize: 10,
+                }}>
+                {slotString}
+              </Text>
+              <View
+                style={{
+                  flex: 1,
+                  borderTopWidth: 0.3,
+                  borderRightWidth: 0.3,
+                  borderColor: '#ccc',
+                  backgroundColor: isDisabled ? '#ccc' : '#fff',
+                }}
+              />
+            </View>
+          );
+        }),
+      )}
+
+      {filteredEvents.map((e, i) => (
+        <View
+          key={i}
+          style={{
+            position: 'absolute',
+            top: e.top,
+            left: e.left,
+            right: e.right,
+            height: e.height,
+            padding: 8,
+            backgroundColor: 'rgba(39, 2, 153, .5)',
+          }}>
+          <Text style={{color: '#fff'}}>
+            {format(e.start, 'HH:mm')} - {format(e.end, 'HH:mm')}
+          </Text>
+          <Text style={{color: '#fff'}}>{e.title}</Text>
+        </View>
+      ))}
+
+      <View
+        style={{
+          position: 'absolute',
+          top: 0,
+          left: 0,
+          right: 0,
+          bottom: 0,
+        }}>
         {hours.map(hour =>
           hourSlots.map((slot, i) => {
             let slotString = `${padNumber(hour)}:${padNumber(slot * step)}`;
             let isDisabled = disableSlot && disableSlot(slotString);
 
             return (
-              <View
+              <Pressable
                 key={i}
+                onPress={handleSelectSlot(
+                  {
+                    start: add(startOfDay(new Date(selectedDate)), {
+                      hours: hour,
+                      minutes: slot * step,
+                    }),
+                    end: add(startOfDay(new Date(selectedDate)), {
+                      hours: hour,
+                      minutes: slot * step + step,
+                    }),
+                  },
+                  isDisabled,
+                )}
                 style={{
-                  flexDirection: 'row',
+                  flex: 1,
                   height: slotHeight,
-                  opacity: isDisabled ? 0.3 : 1,
-                }}>
-                <Text
-                  variant="labelSmall"
-                  style={{
-                    width: minLeft,
-                    borderTopWidth: 0.3,
-                    borderRightWidth: 0.3,
-                    borderColor: '#ccc',
-                    fontSize: 10,
-                  }}>
-                  {slotString}
-                </Text>
-                <View
-                  style={{
-                    flex: 1,
-                    borderTopWidth: 0.3,
-                    borderRightWidth: 0.3,
-                    borderColor: '#ccc',
-                    backgroundColor: isDisabled ? '#ccc' : '#fff',
-                  }}
-                />
-              </View>
+                }}
+              />
             );
           }),
         )}
+      </View>
 
-        {filteredEvents.map((e, i) => (
-          <View
-            key={i}
-            style={{
-              position: 'absolute',
-              top: e.top,
-              left: e.left,
-              right: e.right,
-              height: e.height,
-              padding: 8,
-              backgroundColor: 'rgba(39, 2, 153, .5)',
-            }}>
-            <Text style={{color: '#fff'}}>
-              {format(e.start, 'HH:mm')} - {format(e.end, 'HH:mm')}
-            </Text>
-            <Text style={{color: '#fff'}}>{e.title}</Text>
-          </View>
-        ))}
-
-        <View
+      {selectedSlots.map((slot, i) => (
+        <Pressable
+          key={i}
+          onPress={handleRemoveSlot(slot)}
+          onLongPress={clearSlots}
           style={{
             position: 'absolute',
-            top: 0,
-            left: 0,
-            right: 0,
-            bottom: 0,
+            left: minLeft,
+            right: slot.right,
+            top: slot.top,
+            height: slot.height,
+            backgroundColor: 'rgba(0,0,0,0.5)',
+            padding: 8,
+            justifyContent: 'space-between',
+            flexWrap: 'wrap',
           }}>
-          {hours.map(hour =>
-            hourSlots.map((slot, i) => {
-              let slotString = `${padNumber(hour)}:${padNumber(slot * step)}`;
-              let isDisabled = disableSlot && disableSlot(slotString);
-
-              return (
-                <Pressable
-                  key={i}
-                  onPress={handleSelectSlot(
-                    {
-                      start: add(startOfDay(new Date(selectedDate)), {
-                        hours: hour,
-                        minutes: slot * step,
-                      }),
-                      end: add(startOfDay(new Date(selectedDate)), {
-                        hours: hour,
-                        minutes: slot * step + step,
-                      }),
-                    },
-                    isDisabled,
-                  )}
-                  style={{
-                    flex: 1,
-                    height: slotHeight,
-                  }}
-                />
-              );
-            }),
+          {selectedSlots.length > 1 ? (
+            <>
+              {i === 0 && (
+                <>
+                  <Text style={{color: '#FFF'}}>
+                    {format(slot.start, 'HH:mm')}
+                  </Text>
+                  <Text style={{marginLeft: 8, color: 'rgba(255,255,255,0.3)'}}>
+                    - Tap to delete{'   '}- Tap and Hold to clear
+                  </Text>
+                </>
+              )}
+              {i === selectedSlots.length - 1 && (
+                <>
+                  <Text style={{color: '#FFF'}}>
+                    {format(slot.end, 'HH:mm')}
+                  </Text>
+                  <Text
+                    style={{
+                      marginLeft: 8,
+                      color: '#FFF',
+                      fontWeight: 'bold',
+                    }}>
+                    ({differenceInMinutes(slot.end, selectedSlots[0].start)}{' '}
+                    minutes)
+                  </Text>
+                </>
+              )}
+            </>
+          ) : (
+            <>
+              <Text style={{color: '#FFF'}}>
+                {format(slot.start, 'HH:mm')} - {format(slot.end, 'HH:mm')}
+              </Text>
+              <Text style={{marginLeft: 8, color: 'rgba(255,255,255,0.3)'}}>
+                - Tap to delete
+              </Text>
+              <Text
+                style={{
+                  marginLeft: 8,
+                  color: '#FFF',
+                  fontWeight: 'bold',
+                }}>
+                ({differenceInMinutes(slot.end, selectedSlots[0].start)}{' '}
+                minutes)
+              </Text>
+            </>
           )}
-        </View>
-
-        {selectedSlots.map((slot, i) => (
-          <Pressable
-            key={i}
-            onPress={handleRemoveSlot(slot)}
-            onLongPress={clearSlots}
-            style={{
-              position: 'absolute',
-              left: minLeft,
-              right: slot.right,
-              top: slot.top,
-              height: slot.height,
-              backgroundColor: 'rgba(0,0,0,0.5)',
-              padding: 8,
-              justifyContent: 'space-between',
-              flexWrap: 'wrap',
-            }}>
-            {selectedSlots.length > 1 ? (
-              <>
-                {i === 0 && (
-                  <>
-                    <Text style={{color: '#FFF'}}>
-                      {format(slot.start, 'HH:mm')}
-                    </Text>
-                    <Text
-                      style={{marginLeft: 8, color: 'rgba(255,255,255,0.3)'}}>
-                      - Tap to delete{'   '}- Tap and Hold to clear
-                    </Text>
-                  </>
-                )}
-                {i === selectedSlots.length - 1 && (
-                  <>
-                    <Text style={{color: '#FFF'}}>
-                      {format(slot.end, 'HH:mm')}
-                    </Text>
-                    <Text
-                      style={{
-                        marginLeft: 8,
-                        color: '#FFF',
-                        fontWeight: 'bold',
-                      }}>
-                      ({differenceInMinutes(slot.end, selectedSlots[0].start)}{' '}
-                      minutes)
-                    </Text>
-                  </>
-                )}
-              </>
-            ) : (
-              <>
-                <Text style={{color: '#FFF'}}>
-                  {format(slot.start, 'HH:mm')} - {format(slot.end, 'HH:mm')}
-                </Text>
-                <Text style={{marginLeft: 8, color: 'rgba(255,255,255,0.3)'}}>
-                  - Tap to delete
-                </Text>
-                <Text
-                  style={{
-                    marginLeft: 8,
-                    color: '#FFF',
-                    fontWeight: 'bold',
-                  }}>
-                  ({differenceInMinutes(slot.end, selectedSlots[0].start)}{' '}
-                  minutes)
-                </Text>
-              </>
-            )}
-          </Pressable>
-        ))}
-      </View>
+        </Pressable>
+      ))}
     </View>
   );
 }

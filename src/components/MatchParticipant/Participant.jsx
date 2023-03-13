@@ -7,7 +7,8 @@ import {useSheetContext} from 'src/context/Sheet';
 import EditParticipant from './EditParticipant';
 
 export default function Participant({match, participant, count}) {
-  const {user, handleRemoveParticipant} = useAppContext();
+  const {user, handleRemoveParticipant /*addContact, acceptContact*/} =
+    useAppContext();
   const {displaySheet} = useSheetContext();
   const theme = useTheme();
   const [visibleMenu, setVisibleMenu] = useState(false);
@@ -22,26 +23,76 @@ export default function Participant({match, participant, count}) {
     [match.owner._id, user?._id],
   );
 
+  const isFriend = useMemo(
+    () =>
+      user?.contacts.find(
+        item =>
+          String(item.contact._id) === String(participant._id) &&
+          item.status === 'friend',
+      ),
+    [user?.contacts, participant._id],
+  );
+
+  const isFriendRequested = useMemo(
+    () =>
+      user?.contacts.find(
+        item =>
+          String(item.contact._id) === String(participant._id) &&
+          item.status === 'waiting-res',
+      ),
+    [user?.contacts, participant._id],
+  );
+
+  const isFriendWaiting = useMemo(
+    () =>
+      user?.contacts.find(
+        item =>
+          String(item.contact._id) === String(participant._id) &&
+          item.status === 'waiting-req',
+      ),
+    [user?.contacts, participant._id],
+  );
+
   const isSelf = useMemo(
     () => String(user?._id) === String(participant._id),
     [user?._id, participant._id],
   );
 
   function toggleVisibleMenu() {
-    if (!isUserOwner || isSelf) return;
+    if (isSelf) return;
     setVisibleMenu(v => !v);
   }
 
-  function removeParticipant(participant) {
-    return function () {
-      handleRemoveParticipant({participantRef: participant._id});
+  async function removeParticipant() {
+    try {
+      await handleRemoveParticipant({participantRef: participant._id});
       setVisibleMenu(false);
-    };
+    } catch (err) {
+      console.error(err.message || err);
+    }
   }
 
   function onEditParticipant() {
     displaySheet({content: <EditParticipant />});
   }
+
+  // async function onAdd() {
+  //   try {
+  //     await addContact({contactRef: participant._id});
+  //     setVisibleMenu(false);
+  //   } catch (err) {
+  //     console.error(err.message || err);
+  //   }
+  // }
+
+  // async function onAccept() {
+  //   try {
+  //     await acceptContact({contactRef: participant._id});
+  //     setVisibleMenu(false);
+  //   } catch (err) {
+  //     console.error(err.message || err);
+  //   }
+  // }
 
   return (
     <Menu
@@ -62,19 +113,10 @@ export default function Participant({match, participant, count}) {
               alignItems: 'center',
               borderRadius: 10,
             }}>
-            {isUserOwner && (
-              <IconButton
-                onPress={onEditParticipant}
-                mode="contained"
-                size={18}
-                icon="pencil"
-              />
-            )}
-            {isOwner ? (
-              <IconButton icon="medal" />
-            ) : (
-              <IconButton icon="circle-small" />
-            )}
+            {isFriend && <IconButton icon="contacts" />}
+            {isFriendRequested && <IconButton icon="contacts-outline" />}
+            {isFriendWaiting && <IconButton icon="human-greeting-proximity" />}
+            {isOwner && <IconButton icon="medal" />}
             <Text style={{flex: 1}}>{participant.name}</Text>
             <Chip
               icon="account"
@@ -85,10 +127,19 @@ export default function Participant({match, participant, count}) {
               }}>
               {count}
             </Chip>
+            {isUserOwner && isSelf && (
+              <IconButton onPress={onEditParticipant} size={15} icon="pencil" />
+            )}
           </Card.Content>
         </Card>
       }>
-      <Menu.Item title="Remove" onPress={removeParticipant(participant)} />
+      {isUserOwner && <Menu.Item title="Remove" onPress={removeParticipant} />}
+      {/* {!isFriend && !isFriendRequested && !isFriendWaiting && (
+        <Menu.Item title="Add Friend" onPress={onAdd} />
+      )}
+      {isFriendWaiting && (
+        <Menu.Item title="Accept Friend" onPress={onAccept} />
+      )} */}
     </Menu>
   );
 }

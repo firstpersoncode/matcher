@@ -1,5 +1,5 @@
 import {useMemo, useState} from 'react';
-import {ScrollView} from 'react-native';
+import {ScrollView, View} from 'react-native';
 import {Button} from 'react-native-paper';
 
 import {useAppContext} from 'src/context/App';
@@ -8,11 +8,11 @@ import {useSheetContext} from 'src/context/Sheet';
 import Counter from 'src/components/Counter';
 
 export default function EditParticipant() {
-  const {user, handleUpdateMatchParticipant} = useAppContext();
+  const {user, match, handleUpdateMatchParticipant} = useAppContext();
   const {hideSheet} = useSheetContext();
   const [form, setForm] = useState({
-    count: user.match.count,
-    pcount: user.match.participants.find(
+    count: match.count,
+    pcount: match.participants.find(
       p => String(p.participant._id) === String(user._id),
     ).count,
   });
@@ -20,9 +20,8 @@ export default function EditParticipant() {
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   const joinedCount = useMemo(
-    () =>
-      user.match.participants.map(p => p.count).reduce((sum, a) => sum + a, 0),
-    [user.match.participants],
+    () => match.participants.map(p => p.count).reduce((sum, a) => sum + a, 0),
+    [match.participants],
   );
 
   function handleDecrement(field) {
@@ -69,23 +68,25 @@ export default function EditParticipant() {
 
   return (
     <ScrollView style={{padding: 16}} keyboardShouldPersistTaps="handled">
-      <Counter
-        label="Needed"
-        min={joinedCount}
-        value={form.count}
-        onDecrement={handleDecrement('count')}
-        onIncrement={handleIncrement('count')}
-        error={errors.count}
-      />
-
-      <Counter
-        label="Available"
-        value={form.pcount}
-        onDecrement={handleDecrement('pcount')}
-        onIncrement={handleIncrement('pcount')}
-        error={errors.pcount}
-      />
-
+      <View style={{marginBottom: 16}}>
+        <Counter
+          label="Needed"
+          min={joinedCount}
+          value={form.count}
+          onDecrement={handleDecrement('count')}
+          onIncrement={handleIncrement('count')}
+          error={errors.count}
+        />
+      </View>
+      <View style={{marginBottom: 16}}>
+        <Counter
+          label="Available"
+          value={form.pcount}
+          onDecrement={handleDecrement('pcount')}
+          onIncrement={handleIncrement('pcount')}
+          error={errors.pcount}
+        />
+      </View>
       <Button disabled={isSubmitting} mode="contained" onPress={handleSubmit}>
         Update
       </Button>

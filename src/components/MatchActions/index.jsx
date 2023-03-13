@@ -60,7 +60,7 @@ export default function MatchActions() {
   }
 
   async function leaveMatch() {
-    navigation.navigate('Matcher');
+    navigation.navigate('MatchList');
     hideModal();
     await handleLeaveMatch();
   }
@@ -86,7 +86,7 @@ export default function MatchActions() {
   }
 
   async function deleteMatch() {
-    navigation.navigate('Matcher');
+    navigation.navigate('MatchList');
     hideModal();
     await handleDeleteMatch();
   }
@@ -110,7 +110,11 @@ export default function MatchActions() {
           mode="elevated"
           icon="location-exit"
           textColor="#FFF"
-          style={{backgroundColor: theme.colors.error}}
+          style={{
+            marginVertical: 8,
+            marginHorizontal: 16,
+            backgroundColor: theme.colors.error,
+          }}
           onPress={onLeaveMatch}>
           Leave
         </Button>
@@ -120,14 +124,22 @@ export default function MatchActions() {
           mode="elevated"
           icon="delete"
           textColor="#FFF"
-          style={{backgroundColor: theme.colors.error}}
+          style={{
+            marginVertical: 8,
+            marginHorizontal: 16,
+            backgroundColor: theme.colors.error,
+          }}
           onPress={onDeleteMatch}>
           Delete
         </Button>
       )}
       {!isParticipant && maxJoined > 0 && !user?.match && (
         <Button
-          style={{backgroundColor: theme.colors.primary}}
+          style={{
+            marginVertical: 8,
+            marginHorizontal: 16,
+            backgroundColor: theme.colors.primary,
+          }}
           mode="contained"
           icon="handshake"
           onPress={openJoinMatch}>

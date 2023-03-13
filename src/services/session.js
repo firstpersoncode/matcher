@@ -41,3 +41,10 @@ export async function setCoordinates(coordinates) {
     data: {coordinates: coordinates.slice().reverse()},
   });
 }
+
+export async function setName(name) {
+  await fetcher('/api/v1/setting/name', {
+    method: 'PUT',
+    data: {name},
+  });
+}

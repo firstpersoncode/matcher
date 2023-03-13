@@ -1,6 +1,6 @@
 import {useNavigation, useRoute} from '@react-navigation/native';
 import {View} from 'react-native';
-import {Appbar, IconButton, useTheme} from 'react-native-paper';
+import {IconButton, Text, useTheme} from 'react-native-paper';
 
 export default function Header({
   logo,
@@ -8,7 +8,7 @@ export default function Header({
   disableTitle = false,
   back,
   backIcon = 'chevron-left',
-  children,
+  action,
 }) {
   const navigation = useNavigation();
   const route = useRoute();
@@ -16,26 +16,30 @@ export default function Header({
 
   return (
     <>
-      <Appbar.Header style={{backgroundColor: theme.colors.background}}>
-        <View style={{flex: 1, flexDirection: 'row', alignItems: 'center'}}>
-          {back && (
-            <IconButton
-              style={{margin: 0}}
-              icon={backIcon}
-              onPress={navigation.goBack}
-            />
-          )}
-          {logo}
-          {!disableTitle && (
-            <>
-              {title || (
-                <Appbar.Content title={route.params?.name || route.name} />
-              )}
-            </>
-          )}
-        </View>
-        {children}
-      </Appbar.Header>
+      <View
+        style={{
+          backgroundColor: theme.colors.background,
+          flexDirection: 'row',
+          alignItems: 'center',
+          minHeight: 60,
+        }}>
+        {back && (
+          <IconButton
+            style={{margin: 0}}
+            icon={backIcon}
+            onPress={navigation.goBack}
+          />
+        )}
+        {logo}
+        {!disableTitle && (
+          <>
+            {title || (
+              <Text style={{flex: 1}}>{route.params?.name || route.name}</Text>
+            )}
+          </>
+        )}
+        {action}
+      </View>
     </>
   );
 }

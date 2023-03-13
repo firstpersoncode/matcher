@@ -19,54 +19,50 @@ export default function CalendarPicker({
   }
 
   return (
-    <View style={{flex: 1}}>
-      <Calendar
-        initialDate={
-          selectedDate ? format(selectedDate, 'yyyy-MM-dd') : undefined
-        }
-        renderArrow={dir => (
-          <IconButton
-            mode="contained"
-            icon={dir === 'left' ? 'chevron-left' : 'chevron-right'}
-          />
-        )}
-        dayComponent={({date: {timestamp, day}, state}) => {
-          const date = new Date(timestamp);
-          const isDisabled =
-            state === 'disabled' ||
-            (minDate && isBefore(date, startOfDay(minDate))) ||
-            (disableDay && disableDay(date));
-          const selected = selectedDate && isSameDay(date, selectedDate);
+    <Calendar
+      initialDate={
+        selectedDate ? format(selectedDate, 'yyyy-MM-dd') : undefined
+      }
+      renderArrow={dir => (
+        <IconButton
+          mode="contained"
+          icon={dir === 'left' ? 'chevron-left' : 'chevron-right'}
+        />
+      )}
+      dayComponent={({date: {timestamp, day}, state}) => {
+        const date = new Date(timestamp);
+        const isDisabled =
+          state === 'disabled' ||
+          (minDate && isBefore(date, startOfDay(minDate))) ||
+          (disableDay && disableDay(date));
+        const selected = selectedDate && isSameDay(date, selectedDate);
 
-          return (
-            <View
-              style={{
-                position: 'relative',
-                minWidth: 35,
-                height: 35,
-                opacity: isDisabled ? 0.3 : 1,
-                borderWidth: state === 'today' ? 1 : 0,
-                borderColor: theme.colors.primary,
-                backgroundColor: selected
-                  ? theme.colors.inversePrimary
-                  : '#fff',
-                borderRadius: 100,
-              }}>
-              <Button
-                onPress={selectDate(date, isDisabled)}
-                style={{minWidth: 0}}>
-                <Text
-                  style={{
-                    textAlign: 'center',
-                    color: selected ? theme.colors.onPrimary : 'black',
-                  }}>
-                  {day}
-                </Text>
-              </Button>
-            </View>
-          );
-        }}
-      />
-    </View>
+        return (
+          <View
+            style={{
+              position: 'relative',
+              minWidth: 35,
+              height: 35,
+              opacity: isDisabled ? 0.3 : 1,
+              borderWidth: state === 'today' ? 1 : 0,
+              borderColor: theme.colors.primary,
+              backgroundColor: selected ? theme.colors.inversePrimary : '#fff',
+              borderRadius: 100,
+            }}>
+            <Button
+              onPress={selectDate(date, isDisabled)}
+              style={{minWidth: 0}}>
+              <Text
+                style={{
+                  textAlign: 'center',
+                  color: selected ? theme.colors.onPrimary : 'black',
+                }}>
+                {day}
+              </Text>
+            </Button>
+          </View>
+        );
+      }}
+    />
   );
 }

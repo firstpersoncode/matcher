@@ -1,4 +1,4 @@
-import {useMemo} from 'react';
+import {useEffect, useMemo, useRef, useState} from 'react';
 import {View, ScrollView, Linking} from 'react-native';
 import {
   Button,
@@ -6,10 +6,10 @@ import {
   Divider,
   IconButton,
   Text,
+  TextInput,
   useTheme,
 } from 'react-native-paper';
 import Hyperlink from 'react-native-hyperlink';
-import {useRoute} from '@react-navigation/native';
 import {format} from 'date-fns';
 
 import {useAppContext} from 'src/context/App';
@@ -20,13 +20,13 @@ import Map from 'src/components/Map';
 import EditProvider from './EditProvider';
 import EditProviderSchedule from './EditProviderSchedule';
 import EditSchedule from './EditSchedule';
-import EditName from './EditName';
 
 export default function MatchInfo() {
   const {user, match} = useAppContext();
   const {displayModal} = useModalContext();
   const {displaySheet, displaySheetRoute} = useSheetContext();
   const theme = useTheme();
+
   const isOwner = useMemo(
     () => String(match?.owner._id) === String(user?._id),
     [user?._id, match?.owner._id],
@@ -44,10 +44,6 @@ export default function MatchInfo() {
         />
       ),
     });
-  }
-
-  function onEditName() {
-    displaySheet({content: <EditName />});
   }
 
   function onEditProvider() {
@@ -71,49 +67,54 @@ export default function MatchInfo() {
     displaySheet({content: <EditSchedule />});
   }
 
+  function onAddAnnouncement() {
+    displaySheet({content: <Announcement />});
+  }
+
   return (
     <ScrollView style={{flex: 1, backgroundColor: theme.colors.background}}>
       <View
         style={{
           padding: 16,
           paddingTop: 64,
-          flexDirection: 'row',
-          justifyContent: 'space-between',
-          alignItems: 'flex-start',
           backgroundColor: theme.colors.secondaryContainer,
-          flexWrap: 'wrap',
         }}>
         <View
           style={{
             flexDirection: 'row',
+            justifyContent: 'space-between',
             alignItems: 'flex-start',
-            flexWrap: 'wrap',
-            flex: 1,
           }}>
-          {isOwner && (
-            <IconButton
-              mode="contained"
-              size={18}
-              onPress={onEditName}
-              icon="pencil"
-            />
-          )}
-          <Text variant="headlineLarge" style={{fontWeight: 'bold', flex: 1}}>
-            {match?.name}
-          </Text>
+          <View style={{flex: 1, paddingRight: 16}}>
+            <View
+              style={{
+                marginBottom: 8,
+                flexDirection: 'row',
+                alignItems: 'center',
+              }}>
+              <Text variant="titleLarge" style={{fontWeight: 'bold'}}>
+                {match?.provider.name}
+              </Text>
+              {isOwner && (
+                <IconButton onPress={onEditProvider} size={15} icon="pencil" />
+              )}
+            </View>
+
+            <Text variant="bodyLarge">{match?.provider.address}</Text>
+          </View>
+          <Button
+            mode="contained"
+            icon="map-marker"
+            style={{
+              marginBottom: 8,
+              backgroundColor: theme.colors.tertiaryContainer,
+            }}
+            onPress={showMap}>
+            <Text variant="labelLarge">
+              ~ {Math.floor(match?.distance / 1000)} km
+            </Text>
+          </Button>
         </View>
-        <Button
-          mode="contained"
-          icon="map-marker"
-          style={{
-            marginBottom: 8,
-            backgroundColor: theme.colors.tertiaryContainer,
-          }}
-          onPress={showMap}>
-          <Text variant="labelLarge">
-            ~ {Math.floor(match?.distance / 1000)} km
-          </Text>
-        </Button>
       </View>
 
       <Divider />
@@ -123,74 +124,44 @@ export default function MatchInfo() {
           padding: 16,
           paddingBottom: 64,
           marginBottom: 48,
-          flexDirection: 'row',
-          alignItems: 'flex-start',
           backgroundColor: theme.colors.secondaryContainer,
         }}>
-        {isOwner && (
-          <IconButton
-            mode="contained"
-            onPress={onEditProvider}
-            size={18}
-            icon="pencil"
-          />
-        )}
-        <View style={{flex: 1}}>
-          <Text
-            variant="titleLarge"
-            style={{fontWeight: 'bold', marginBottom: 16}}>
-            {match?.provider.name}
-          </Text>
-          <Text variant="bodyLarge" style={{marginBottom: 16}}>
-            {match?.provider.address}
-          </Text>
-          <View style={{flexDirection: 'row', alignItems: 'flex-start'}}>
-            {isOwner && (
-              <IconButton
-                mode="contained"
-                onPress={onEditSchedule}
-                size={18}
-                icon="pencil"
-              />
-            )}
-            <View style={{flex: 1}}>
-              <View style={{flexDirection: 'row', alignItems: 'center'}}>
-                <IconButton icon="calendar-check" />
-                {match && (
-                  <Text
-                    variant="titleMedium"
-                    style={{
-                      flex: 1,
-                      color: theme.colors.onPrimaryContainer,
-                      fontWeight: 'bold',
-                    }}>
-                    {format(new Date(match?.start), 'iiii, do MMMM yyyy')}
-                  </Text>
-                )}
-              </View>
-              <View style={{flexDirection: 'row', alignItems: 'center'}}>
-                <IconButton icon="clock-outline" />
-                {match && (
-                  <Text
-                    variant="titleMedium"
-                    style={{
-                      flex: 1,
-                      color: theme.colors.onPrimaryContainer,
-                      fontWeight: 'bold',
-                    }}>
-                    {format(new Date(match?.start), 'HH:mm')} -{' '}
-                    {format(new Date(match?.end), 'HH:mm')}
-                  </Text>
-                )}
-              </View>
-            </View>
-          </View>
+        <View style={{flexDirection: 'row', alignItems: 'center'}}>
+          <IconButton icon="calendar-check" />
+          {match && (
+            <Text
+              variant="titleMedium"
+              style={{
+                color: theme.colors.onPrimaryContainer,
+                fontWeight: 'bold',
+              }}>
+              {format(new Date(match?.start), 'iiii, do MMMM yyyy')}
+            </Text>
+          )}
+          {isOwner && (
+            <IconButton onPress={onEditSchedule} size={15} icon="pencil" />
+          )}
+        </View>
+        <View style={{flexDirection: 'row', alignItems: 'center'}}>
+          <IconButton icon="clock-outline" />
+          {match && (
+            <Text
+              variant="titleMedium"
+              style={{
+                color: theme.colors.onPrimaryContainer,
+                fontWeight: 'bold',
+              }}>
+              {format(new Date(match?.start), 'HH:mm')} -{' '}
+              {format(new Date(match?.end), 'HH:mm')}
+            </Text>
+          )}
         </View>
       </View>
 
       <View style={{marginBottom: 32, position: 'relative'}}>
         <Divider style={{backgroundColor: theme.colors.secondary}} />
         <IconButton
+          onPress={isOwner ? onAddAnnouncement : undefined}
           size={20}
           icon="bullhorn"
           style={{
@@ -208,7 +179,7 @@ export default function MatchInfo() {
           <Card key={announcement._id} style={{marginBottom: 16}}>
             <Card.Content>
               <Text variant="titleMedium" style={{marginBottom: 16}}>
-                {match?.owner.name}
+                {announcement.owner.name}
               </Text>
               <Hyperlink
                 onPress={url => Linking.openURL(url)}
@@ -223,5 +194,71 @@ export default function MatchInfo() {
         ))}
       </View>
     </ScrollView>
+  );
+}
+
+function Announcement() {
+  const {sendAnnouncement} = useAppContext();
+  const {hideSheet} = useSheetContext();
+  const inputRef = useRef();
+  const timeoutRef = useRef();
+  const [message, setMessage] = useState('');
+  const [isSubmitting, setIsSubmitting] = useState(false);
+
+  useEffect(() => {
+    if (timeoutRef.current) clearTimeout(timeoutRef.current);
+    timeoutRef.current = setTimeout(() => {
+      inputRef.current?.focus();
+    }, 50);
+    return () => {
+      timeoutRef.current && clearTimeout(timeoutRef.current);
+      inputRef.current?.blur();
+    };
+  }, []);
+
+  function onChange(text) {
+    setMessage(text);
+  }
+
+  async function onSubmit() {
+    if (!Boolean(message.trim())) return;
+
+    setIsSubmitting(true);
+    try {
+      await sendAnnouncement({text: message});
+      inputRef.current?.blur();
+      hideSheet();
+    } catch (err) {
+      console.error(err.message || err);
+    }
+    setIsSubmitting(false);
+  }
+
+  return (
+    <View
+      keyboardShouldPersistTaps="handled"
+      style={{
+        padding: 16,
+        flexDirection: 'row',
+        alignItems: 'flex-end',
+        maxHeight: 200,
+      }}>
+      <TextInput
+        style={{flex: 1}}
+        mode="outlined"
+        placeholder="Say something ..."
+        value={message}
+        onChangeText={onChange}
+        multiline
+        maxLength={500}
+        right={<TextInput.Affix text={`${String(message.length)}/500`} />}
+      />
+      <IconButton
+        disabled={isSubmitting}
+        mode="contained"
+        icon="send"
+        onPress={onSubmit}
+      />
+    </View>
   );
 }

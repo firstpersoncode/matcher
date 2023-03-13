@@ -10,7 +10,8 @@ import {
   signIn,
   signUp,
   signOut,
-} from '../services/session';
+  setName,
+} from 'src/services/session';
 import {
   createMatch,
   deleteMatch,
@@ -23,15 +24,23 @@ import {
   updateMatchProvider,
   updateMatchSchedule,
   updateMatchParticipant,
-} from '../services/match';
+  invitation,
+  rejectInvitation,
+} from 'src/services/match';
 import {
   announce,
   fetchMessages,
-  getLastRead,
+  fetchPrivateMessages,
   postMessage,
-  setLastRead,
+  postAnnouncement,
+  postPrivateMessage,
   unannounce,
-} from '../services/message';
+} from 'src/services/message';
+import {
+  confirmContact,
+  fetchContact,
+  requestContact,
+} from 'src/services/contact';
 
 const channelId = 'test-channel';
 let socketClient;
@@ -45,7 +54,8 @@ const appContext = {
   matches: [],
   providers: [],
   messages: [],
-  unreads: 0,
+  inbox: null,
+  privateMessages: [],
 };
 
 function useAppState() {
@@ -53,6 +63,14 @@ function useAppState() {
   const selectedMatch = useMemo(
     () => ctx.matches.find(m => String(m._id) === String(ctx.match?._id)),
     [ctx.match?._id, ctx.matches],
+  );
+
+  const selectedInbox = useMemo(
+    () =>
+      ctx.user?.contacts.find(
+        item => String(item.contact._id) === String(ctx.inbox?._id),
+      )?.contact,
+    [ctx.inbox?._id, ctx.user?.contacts],
   );
 
   useEffect(() => {
@@ -90,15 +108,18 @@ function useAppState() {
   }, [ctx.online]);
 
   useEffect(() => {
+    if (ctx.user?._id) {
+      socketClient.emit('join', ctx.user?._id);
+      loadPrivateMessages();
+    }
+  }, [ctx.user?._id]);
+
+  useEffect(() => {
     if (ctx.user?.match?._id) {
-      socketClient.emit('join', ctx.user.match._id);
+      socketClient.emit('join', ctx.user?.match?._id);
       loadMessages();
     }
   }, [ctx.user?.match?._id]);
-
-  useEffect(() => {
-    getTotalUnreads();
-  }, [ctx.messages]);
 
   function init() {
     Geolocation.getCurrentPosition(
@@ -189,6 +210,7 @@ function useAppState() {
             let isOwner = String(data.owner._id) === String(currUser._id);
             if (isOwner) {
               currUser.match = data;
+              currUser.invitations = [];
             }
           }
 
@@ -236,6 +258,7 @@ function useAppState() {
               String(data.participant._id) === String(currUser._id);
             if (isParticipant) {
               currUser.match = data.match;
+              currUser.invitations = [];
             }
           }
 
@@ -375,6 +398,28 @@ function useAppState() {
           }),
         }));
         break;
+      case 'announcement':
+        setContext(v => {
+          let currUser = v.user;
+          let currMessages = v.messages;
+          if (currUser && currUser.match) {
+            if (String(data.match._id) === String(currUser.match._id)) {
+              currMessages = [...currMessages, data.announcement];
+            }
+          }
+
+          return {
+            ...v,
+            matches: [...v.matches].map(m => {
+              if (String(m._id) === String(data.match._id)) {
+                m.announcements = [...m.announcements, data.announcement];
+              }
+              return m;
+            }),
+            messages: currMessages,
+          };
+        });
+        break;
       default:
         console.log('unknown broadcast type', type);
     }
@@ -385,9 +430,73 @@ function useAppState() {
       case 'message-post':
         setContext(v => ({...v, messages: [...v.messages, data]}));
         break;
+      case 'private-message-post':
+        setContext(v => ({
+          ...v,
+          privateMessages: [...v.privateMessages, data],
+        }));
+        break;
+      case 'contact-request':
+        setContext(v => {
+          let currUser = v.user;
+          if (currUser)
+            if (String(currUser._id) === String(data.requester._id))
+              currUser.contacts = [
+                ...currUser.contacts,
+                {contact: data.responser, status: 'waiting-res'},
+              ];
+            else if (String(currUser._id) === String(data.responser._id))
+              currUser.contacts = [
+                ...currUser.contacts,
+                {contact: data.requester, status: 'waiting-req'},
+              ];
+          return {...v, user: currUser};
+        });
+        break;
+      case 'contact-confirm':
+        setContext(v => {
+          let currUser = v.user;
+          if (currUser) {
+            currUser.contacts = currUser.contacts.map(item => {
+              if (
+                String(item.contact._id) === String(data.requester._id) ||
+                String(item.contact._id) === String(data.responser._id)
+              )
+                item.status = 'friend';
+              return item;
+            });
+          }
+          return {...v, user: currUser};
+        });
+        break;
+      case 'match-invite':
+        setContext(v => {
+          let currUser = v.user;
+          if (currUser) {
+            currUser.invitations = [...currUser.invitations, data];
+          }
+          return {...v, user: currUser};
+        });
+        break;
+      case 'match-reject-invite':
+        setContext(v => {
+          let currUser = v.user;
+          if (currUser) {
+            currUser.invitations = currUser.invitations.filter(
+              m => String(m._id) !== String(data),
+            );
+          }
+          return {...v, user: currUser};
+        });
+        break;
       default:
         console.log('unknown broadcast type', type);
     }
+  }
+
+  async function handleUpdateName(name) {
+    await setName(name);
+    setContext(v => ({...v, user: {...v.user, name}}));
   }
 
   async function handleSignIn(form) {
@@ -402,7 +511,11 @@ function useAppState() {
 
   async function handleSignOut() {
     await signOut();
-    setContext(v => ({...v, user: null}));
+    setContext(v => {
+      socketClient.emit('leave', v.user._id);
+      if (v.user.match) socketClient.emit('leave', v.user.match._id);
+      return {...v, user: null};
+    });
   }
 
   function selectMatch(match) {
@@ -450,6 +563,14 @@ function useAppState() {
     await removeParticipant(participant);
   }
 
+  async function handleInviteParticipant(participantRef) {
+    await invitation(participantRef);
+  }
+
+  async function handleRejectInvite(matchRef) {
+    await rejectInvitation(matchRef);
+  }
+
   async function loadMessages() {
     const messages = await fetchMessages();
     setContext(v => ({...v, messages}));
@@ -459,39 +580,43 @@ function useAppState() {
     await postMessage(message);
   }
 
-  function saveLastRead() {
-    setContext(v => {
-      let currMessages = v.messages;
-      const index = currMessages.length - 1;
-      if (index !== -1) {
-        let lastMessage = currMessages[index];
-        setLastRead(lastMessage._id);
-        currMessages = currMessages.slice(index);
-      }
-
-      return {
-        ...v,
-        unreads: currMessages.length - 1,
-      };
-    });
+  async function sendAnnouncement(message) {
+    await postAnnouncement(message);
   }
 
-  async function getTotalUnreads() {
-    const messageId = await getLastRead();
-    setContext(v => {
-      let currMessages = v.messages;
-      const index = currMessages.findIndex(
-        m => String(m._id) === String(messageId),
-      );
+  // function saveLastRead() {
+  //   setContext(v => {
+  //     let currMessages = v.messages;
+  //     const index = currMessages.length - 1;
+  //     if (index !== -1) {
+  //       let lastMessage = currMessages[index];
+  //       setLastRead(lastMessage._id);
+  //       currMessages = currMessages.slice(index);
+  //     }
 
-      if (index !== -1) currMessages = currMessages.slice(index + 1);
+  //     return {
+  //       ...v,
+  //       unreads: currMessages.length - 1,
+  //     };
+  //   });
+  // }
 
-      return {
-        ...v,
-        unreads: currMessages.length,
-      };
-    });
-  }
+  // async function getTotalUnreads() {
+  //   const messageId = await getLastRead();
+  //   setContext(v => {
+  //     let currMessages = v.messages;
+  //     const index = currMessages.findIndex(
+  //       m => String(m._id) === String(messageId),
+  //     );
+
+  //     if (index !== -1) currMessages = currMessages.slice(index + 1);
+
+  //     return {
+  //       ...v,
+  //       unreads: currMessages.length,
+  //     };
+  //   });
+  // }
 
   async function announceMessage(message) {
     await announce(message);
@@ -501,10 +626,37 @@ function useAppState() {
     await unannounce(message);
   }
 
+  function selectInbox(inbox) {
+    setContext(v => ({...v, inbox}));
+  }
+
+  async function getContact(idString) {
+    return await fetchContact(idString);
+  }
+
+  async function addContact(contact) {
+    await requestContact(contact);
+  }
+
+  async function acceptContact(contact) {
+    await confirmContact(contact);
+  }
+
+  async function loadPrivateMessages() {
+    const privateMessages = await fetchPrivateMessages();
+    setContext(v => ({...v, privateMessages}));
+  }
+
+  async function sendPrivateMessage(message) {
+    await postPrivateMessage(message);
+  }
+
   return {
     ...ctx,
     match: selectedMatch,
+    inbox: selectedInbox,
     init,
+    handleUpdateName,
     handleSignIn,
     handleSignUp,
     handleSignOut,
@@ -519,11 +671,17 @@ function useAppState() {
     handleUpdateMatchSchedule,
     handleUpdateMatchParticipant,
     handleRemoveParticipant,
+    handleInviteParticipant,
+    handleRejectInvite,
     sendMessage,
-    saveLastRead,
-    getTotalUnreads,
+    sendAnnouncement,
     announceMessage,
     unAnnounceMessage,
+    selectInbox,
+    getContact,
+    addContact,
+    acceptContact,
+    sendPrivateMessage,
   };
 }
 

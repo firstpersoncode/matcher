@@ -77,3 +77,17 @@ export async function fetchProviders() {
   });
   return data;
 }
+
+export async function invitation(participantRef) {
+  await fetcher('/api/v1/match/invite', {
+    method: 'PUT',
+    data: {participantRef},
+  });
+}
+
+export async function rejectInvitation(matchRef) {
+  await fetcher('/api/v1/match/reject-invite', {
+    method: 'PUT',
+    data: {matchRef},
+  });
+}

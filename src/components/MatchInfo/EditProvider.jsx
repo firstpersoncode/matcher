@@ -195,7 +195,7 @@ function Filter({availability, onSubmit}) {
   }
 
   return (
-    <View style={{padding: 16, height: '80%', backgroundColor: '#FFF'}}>
+    <View style={{padding: 16,  backgroundColor: '#FFF'}}>
       {Object.keys(DAY_MAPS).map(a => (
         <Button
           mode="elevated"

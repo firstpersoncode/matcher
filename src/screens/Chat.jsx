@@ -1,20 +1,32 @@
 import {useMemo, useState} from 'react';
 import {View, FlatList} from 'react-native';
-import {IconButton, Text, TextInput, useTheme} from 'react-native-paper';
+import {
+  Divider,
+  IconButton,
+  Text,
+  TextInput,
+  useTheme,
+} from 'react-native-paper';
 
 import {useAppContext} from 'src/context/App';
 
-import Message from './Message';
+import Header from 'src/components/Header';
+import Message from 'src/components/Message';
 
-export default function MatchChat() {
-  const {user, match, messages, sendMessage} = useAppContext();
+export default function Chat() {
+  const {user, inbox, privateMessages, sendPrivateMessage} = useAppContext();
   const theme = useTheme();
   const [message, setMessage] = useState('');
   const [isSending, setIsSending] = useState(false);
 
-  const isParticipant = useMemo(
-    () => user?.match && String(match?._id) === String(user.match._id),
-    [user?.match, match?._id],
+  const filteredPrivateMessages = useMemo(
+    () =>
+      privateMessages.filter(
+        m =>
+          String(m.owner._id) === String(inbox._id) ||
+          String(m.recipient._id) === String(inbox._id),
+      ),
+    [privateMessages, inbox._id],
   );
 
   function onTypingMessage(text) {
@@ -26,28 +38,37 @@ export default function MatchChat() {
     setMessage('');
     setIsSending(true);
     try {
-      await sendMessage({text: message});
+      await sendPrivateMessage({text: message, recipientRef: inbox._id});
     } catch (err) {
       console.error(err.message || err);
     }
     setIsSending(false);
   }
 
-  if (!isParticipant)
-    return (
-      <View style={{flex: 1, justifyContent: 'center', alignItems: 'center'}}>
-        <Text>You are not a participant in this match</Text>
-      </View>
-    );
-
   return (
     <View style={{flex: 1, backgroundColor: theme.colors.background}}>
+      <Header
+        back
+        title={
+          <Text style={{flex: 1}} variant="titleLarge">
+            {inbox.name}
+          </Text>
+        }
+        // title={
+        //   <Text style={{flex: 1}} variant="titleLarge">
+        //     {user.name}
+        //   </Text>
+        // }
+      />
+      <Divider />
+
       <FlatList
         inverted
-        data={messages.slice().reverse()}
+        data={filteredPrivateMessages.slice().reverse()}
         renderItem={({item}) => <Message message={item} />}
         keyExtractor={item => item._id}
       />
+
       <View
         keyboardShouldPersistTaps="handled"
         style={{

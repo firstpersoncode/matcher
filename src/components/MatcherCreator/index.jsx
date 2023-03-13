@@ -45,7 +45,6 @@ export default function MatcherCreator() {
 
   return (
     <FAB
-      mode="flat"
       color="#FFF"
       icon="plus"
       style={{

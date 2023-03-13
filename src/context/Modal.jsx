@@ -59,7 +59,12 @@ function Dialog() {
 function DialogModal({visible, content, hideModal}) {
   return (
     <Modal
-      contentContainerStyle={{margin: 16, zIndex: 99999}}
+      contentContainerStyle={{
+        margin: 16,
+        zIndex: 99999,
+        borderRadius: 15,
+        overflow: 'hidden',
+      }}
       visible={visible}
       onDismiss={hideModal}>
       <View
@@ -67,7 +72,12 @@ function DialogModal({visible, content, hideModal}) {
           backgroundColor: '#fff',
           alignItems: 'flex-end',
         }}>
-        <IconButton size={20} icon="close" onPress={hideModal} />
+        <IconButton
+          style={{margin: 2}}
+          size={15}
+          icon="close"
+          onPress={hideModal}
+        />
       </View>
       <Divider />
       {content}

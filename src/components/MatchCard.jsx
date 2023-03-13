@@ -14,7 +14,7 @@ import {format} from 'date-fns';
 import {useAppContext} from 'src/context/App';
 
 export default function MatchCard({mini = false, match, onPress, onPressMap}) {
-  const {user, unreads} = useAppContext();
+  const {user, messages} = useAppContext();
   const theme = useTheme();
 
   const isParticipant = useMemo(
@@ -27,26 +27,21 @@ export default function MatchCard({mini = false, match, onPress, onPressMap}) {
     [match.participants],
   );
 
-  const totalUnreads = useMemo(
-    () => (isParticipant ? unreads : 0),
-    [isParticipant, unreads],
-  );
-
   return (
     <Card
       elevation={isParticipant ? 3 : 1}
       style={{
         backgroundColor: isParticipant ? theme.colors.inversePrimary : '#FFF',
         padding: 0,
-        margin: 16,
+        marginHorizontal: 16,
+        marginVertical: 8,
       }}>
       <TouchableRipple onPress={onPress}>
         <Card.Content style={{position: 'relative', padding: 16}}>
-          {totalUnreads > 0 && (
+          {messages.length > 0 && (
             <Badge
-              size={30}
               style={{position: 'absolute', top: -8, right: -8, zIndex: 1}}>
-              {totalUnreads}
+              {messages.length}
             </Badge>
           )}
           <View
