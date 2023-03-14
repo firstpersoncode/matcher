@@ -54,7 +54,7 @@ const appContext = {
   matches: [],
   providers: [],
   messages: [],
-  messagesLastRead: null,
+  messagesLastRead: [],
   inbox: null,
   privateMessages: [],
 };
@@ -572,8 +572,25 @@ function useAppState() {
     await rejectInvitation(matchRef);
   }
 
-  function setMessagesLastRead(id) {
-    setContext(v => ({...v, messagesLastRead: id}));
+  function setMessagesLastRead(match, message) {
+    setContext(v => {
+      let currMessagesLastRead = v.messagesLastRead;
+      let lastRead = currMessagesLastRead.find(
+        m => String(m.match) === String(match),
+      );
+
+      if (lastRead) {
+        currMessagesLastRead = currMessagesLastRead.map(m => {
+          if (String(m.match) === String(match)) m.message = message;
+          return m;
+        });
+      } else currMessagesLastRead = [...currMessagesLastRead, {match, message}];
+
+      return {
+        ...v,
+        messagesLastRead: currMessagesLastRead,
+      };
+    });
   }
 
   async function loadMessages() {

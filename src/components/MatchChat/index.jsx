@@ -22,12 +22,38 @@ export default function MatchChat() {
 
   useFocusEffect(
     useCallback(() => {
-      let lastMessage = messages[messages.length - 1];
-      if (lastMessage) {
-        AsyncStorage.setItem('messages-last-read', lastMessage._id);
-        setMessagesLastRead(lastMessage._id);
+      if (match) {
+        let lastMessage = messages[messages.length - 1];
+        if (lastMessage) {
+          AsyncStorage.getItem('messages-last-read').then(res => {
+            let currMessagesLastRead = res ? JSON.parse(res) : [];
+
+            let lastRead = currMessagesLastRead.find(
+              m => String(m.match) === String(match._id),
+            );
+
+            if (lastRead) {
+              currMessagesLastRead = currMessagesLastRead.map(m => {
+                if (String(m.match) === String(match._id))
+                  m.message = lastMessage._id;
+                return m;
+              });
+            } else
+              currMessagesLastRead = [
+                ...currMessagesLastRead,
+                {match: match._id, message: lastMessage._id},
+              ];
+
+            AsyncStorage.setItem(
+              'messages-last-read',
+              JSON.stringify(currMessagesLastRead),
+            );
+          });
+
+          setMessagesLastRead(match._id, lastMessage._id);
+        }
       }
-    }, [messages]),
+    }, [match, messages]),
   );
 
   function onTypingMessage(text) {

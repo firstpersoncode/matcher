@@ -55,8 +55,19 @@ export default function Match() {
   useEffect(() => {
     if (!(isParticipant && messages.length)) return;
     (async () => {
-      let lastRead =
-        messagesLastRead || (await AsyncStorage.getItem('messages-last-read'));
+      let messageLastRead = messagesLastRead.find(
+        m => String(m.match) === String(match._id),
+      );
+
+      if (!messageLastRead) {
+        let res = await AsyncStorage.getItem('messages-last-read');
+        let currMessagesLastRead = res ? JSON.parse(res) : [];
+        messageLastRead = currMessagesLastRead.find(
+          m => String(m.match) === String(match._id),
+        );
+      }
+
+      let lastRead = messageLastRead?.message;
       if (lastRead) {
         let index = messages.findIndex(m => String(m._id) === String(lastRead));
         if (index !== -1) {
@@ -65,7 +76,7 @@ export default function Match() {
         }
       } else setUnreadCounts(messages.length);
     })();
-  }, [isParticipant, messages, messagesLastRead]);
+  }, [isParticipant, messages, messagesLastRead, match._id]);
 
   function onEditName() {
     displaySheet({content: <EditName />});
