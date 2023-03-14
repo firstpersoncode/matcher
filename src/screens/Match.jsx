@@ -1,5 +1,5 @@
 import {useEffect, useMemo, useRef, useState} from 'react';
-import {Pressable, View, Image} from 'react-native';
+import {View} from 'react-native';
 import {
   Avatar,
   Badge,
