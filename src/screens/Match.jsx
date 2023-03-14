@@ -111,17 +111,13 @@ export default function Match() {
       />
       <Divider />
       <Tab.Navigator
-        backBehavior="history"
+        backBehavior="initialRoute"
         tabBarPosition="bottom"
         screenOptions={{
           swipeEnabled: false,
           lazy: true,
-          tabBarIndicatorStyle: {
-            backgroundColor: theme.colors.primary,
-            bottom: 'auto',
-            top: 0,
-          },
-          tabBarStyle: {backgroundColor: theme.colors.background},
+          tabBarIndicatorStyle: {backgroundColor: 'transparent'},
+          tabBarStyle: {backgroundColor: theme.colors.secondaryContainer},
           tabBarItemStyle: {
             flexDirection: 'row',
             alignItems: 'center',
@@ -131,9 +127,9 @@ export default function Match() {
           name="MatchInfo"
           options={{
             tabBarShowLabel: false,
-            tabBarIcon: ({color}) => (
+            tabBarIcon: ({color, focused}) => (
               <Avatar.Icon
-                icon="information-outline"
+                icon={focused ? 'information' : 'information-outline'}
                 size={30}
                 color={color}
                 style={{
@@ -148,9 +144,9 @@ export default function Match() {
           name="MatchParticipant"
           options={{
             title: `${joinedCount} / ${match.count}`,
-            tabBarIcon: ({color}) => (
+            tabBarIcon: ({color, focused}) => (
               <Avatar.Icon
-                icon="account-multiple"
+                icon={focused ? 'account-multiple' : 'account-multiple-outline'}
                 size={30}
                 color={color}
                 style={{
@@ -167,7 +163,7 @@ export default function Match() {
           name="MatchChat"
           options={{
             tabBarShowLabel: false,
-            tabBarIcon: ({color}) => (
+            tabBarIcon: ({color, focused}) => (
               <View style={{position: 'relative'}}>
                 {unreadCounts > 0 && (
                   <Badge
@@ -177,7 +173,7 @@ export default function Match() {
                   </Badge>
                 )}
                 <Avatar.Icon
-                  icon="chat"
+                  icon={focused ? 'chat' : 'chat-outline'}
                   size={30}
                   color={color}
                   style={{
