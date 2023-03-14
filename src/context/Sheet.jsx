@@ -19,6 +19,7 @@ function useSheetState() {
   const [ctx, setContext] = useState(sheetContext);
 
   function displaySheet({content, state = {}}) {
+    if (ctx.visible) return;
     setContext(v => ({
       ...v,
       visible: true,
@@ -34,6 +35,7 @@ function useSheetState() {
   }
 
   function displaySheetRoute({routes, initialRoute, state = {}}) {
+    if (ctx.visible) return;
     setContext(v => ({
       ...v,
       visible: true,
@@ -90,7 +92,7 @@ export default function SheetContextProvider({children}) {
 }
 
 function Sheet({sheetId}) {
-  const {content} = useSheetContext();
+  const {content, visible, hideSheet} = useSheetContext();
 
   return (
     <ActionSheet
@@ -99,14 +101,17 @@ function Sheet({sheetId}) {
       zIndex={0}
       id={sheetId}
       useBottomSafeAreaPadding
-      drawUnderStatusBar={false}>
+      drawUnderStatusBar={false}
+      onClose={() => {
+        if (visible) hideSheet();
+      }}>
       {content}
     </ActionSheet>
   );
 }
 
 function SheetRoute({sheetId}) {
-  const {routes, initialRoute} = useSheetContext();
+  const {routes, visible, hideSheetRoute, initialRoute} = useSheetContext();
 
   return (
     <ActionSheet
@@ -119,6 +124,9 @@ function SheetRoute({sheetId}) {
       initialRoute={initialRoute}
       useBottomSafeAreaPadding
       drawUnderStatusBar={false}
+      onClose={() => {
+        if (visible) hideSheetRoute();
+      }}
     />
   );
 }

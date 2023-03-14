@@ -12,6 +12,7 @@ function useModalState() {
   const [ctx, setContext] = useState(modalContext);
 
   function displayModal({content, portal = false}) {
+    if (ctx.visible || ctx.portal) return;
     setContext({visible: !portal, portal, content});
   }
 
