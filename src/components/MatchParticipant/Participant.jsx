@@ -7,7 +7,7 @@ import {useSheetContext} from 'src/context/Sheet';
 import EditParticipant from './EditParticipant';
 
 export default function Participant({match, participant, count}) {
-  const {user, handleRemoveParticipant /*addContact, acceptContact*/} =
+  const {user, handleRemoveParticipant, addContact, acceptContact} =
     useAppContext();
   const {displaySheet} = useSheetContext();
   const theme = useTheme();
@@ -76,23 +76,23 @@ export default function Participant({match, participant, count}) {
     displaySheet({content: <EditParticipant />});
   }
 
-  // async function onAdd() {
-  //   try {
-  //     await addContact({contactRef: participant._id});
-  //     setVisibleMenu(false);
-  //   } catch (err) {
-  //     console.error(err.message || err);
-  //   }
-  // }
+  async function onAdd() {
+    try {
+      await addContact({contactRef: participant._id});
+      setVisibleMenu(false);
+    } catch (err) {
+      console.error(err.message || err);
+    }
+  }
 
-  // async function onAccept() {
-  //   try {
-  //     await acceptContact({contactRef: participant._id});
-  //     setVisibleMenu(false);
-  //   } catch (err) {
-  //     console.error(err.message || err);
-  //   }
-  // }
+  async function onAccept() {
+    try {
+      await acceptContact({contactRef: participant._id});
+      setVisibleMenu(false);
+    } catch (err) {
+      console.error(err.message || err);
+    }
+  }
 
   return (
     <Menu
@@ -113,10 +113,14 @@ export default function Participant({match, participant, count}) {
               alignItems: 'center',
               borderRadius: 10,
             }}>
-            {isFriend && <IconButton icon="contacts" />}
-            {isFriendRequested && <IconButton icon="contacts-outline" />}
-            {isFriendWaiting && <IconButton icon="human-greeting-proximity" />}
-            {isOwner && <IconButton icon="medal" />}
+            {isFriend && <IconButton style={{margin: 0}} icon="contacts" />}
+            {isFriendRequested && (
+              <IconButton style={{margin: 0}} icon="contacts-outline" />
+            )}
+            {isFriendWaiting && (
+              <IconButton style={{margin: 0}} icon="human-greeting-proximity" />
+            )}
+            {isOwner && <IconButton style={{margin: 0}} icon="medal" />}
             <Text style={{flex: 1}}>{participant.name}</Text>
             <Chip
               icon="account"
@@ -128,18 +132,23 @@ export default function Participant({match, participant, count}) {
               {count}
             </Chip>
             {isUserOwner && isSelf && (
-              <IconButton onPress={onEditParticipant} size={15} icon="pencil" />
+              <IconButton
+                style={{margin: 0}}
+                onPress={onEditParticipant}
+                size={15}
+                icon="pencil"
+              />
             )}
           </Card.Content>
         </Card>
       }>
       {isUserOwner && <Menu.Item title="Remove" onPress={removeParticipant} />}
-      {/* {!isFriend && !isFriendRequested && !isFriendWaiting && (
+      {!isFriend && !isFriendRequested && !isFriendWaiting && (
         <Menu.Item title="Add Friend" onPress={onAdd} />
       )}
       {isFriendWaiting && (
         <Menu.Item title="Accept Friend" onPress={onAccept} />
-      )} */}
+      )}
     </Menu>
   );
 }
