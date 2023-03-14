@@ -246,6 +246,7 @@ function Announcement() {
         maxHeight: 200,
       }}>
       <TextInput
+        ref={inputRef}
         style={{flex: 1}}
         mode="outlined"
         placeholder="Say something ..."
