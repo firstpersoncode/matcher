@@ -68,6 +68,7 @@ export default function MatchInfo() {
   }
 
   function onAddAnnouncement() {
+    if (!isOwner) return;
     displaySheet({content: <Announcement />});
   }
 
@@ -160,18 +161,19 @@ export default function MatchInfo() {
 
       <View style={{marginBottom: 32, position: 'relative'}}>
         <Divider style={{backgroundColor: theme.colors.secondary}} />
-        <IconButton
-          onPress={isOwner ? onAddAnnouncement : undefined}
-          size={20}
+        <Button
+          onPress={onAddAnnouncement}
+          mode="contained"
           icon="bullhorn"
           style={{
-            backgroundColor: theme.colors.secondaryContainer,
+            // backgroundColor: theme.colors.secondaryContainer,
             position: 'absolute',
             top: 0,
-            transform: [{translateY: -25}],
+            transform: [{translateY: -16}],
             left: 16,
-          }}
-        />
+          }}>
+          Announcement
+        </Button>
       </View>
 
       <View style={{padding: 16}}>
