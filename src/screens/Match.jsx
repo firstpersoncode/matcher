@@ -111,8 +111,10 @@ export default function Match() {
       />
       <Divider />
       <Tab.Navigator
+        backBehavior="history"
         tabBarPosition="bottom"
         screenOptions={{
+          swipeEnabled: false,
           lazy: true,
           tabBarIndicatorStyle: {
             backgroundColor: theme.colors.primary,
