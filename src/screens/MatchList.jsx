@@ -33,38 +33,36 @@ export default function MatchList() {
   const [filter, setFilter] = useState({date: null, count: 0});
 
   const filteredMatches = useMemo(() => {
-    return (
-      matches
-        // .filter(m =>
-        //   !user?.match ? true : String(m._id) !== String(user.match._id),
-        // )
-        .filter(m => {
-          if (search) {
-            const searchFields =
-              `${m.name} ${m.provider.name} ${m.provider.address} ${m.owner.name}`.toLowerCase();
-            return searchFields.includes(search.toLowerCase());
-          }
+    return matches
+      .filter(m =>
+        !user?.match ? true : String(m._id) !== String(user.match._id),
+      )
+      .filter(m => {
+        if (search) {
+          const searchFields =
+            `${m.name} ${m.provider.name} ${m.provider.address} ${m.owner.name}`.toLowerCase();
+          return searchFields.includes(search.toLowerCase());
+        }
 
-          return true;
-        })
-        .filter(m =>
-          filter.date
-            ? isSameDay(startOfDay(new Date(m.start)), new Date(filter.date))
-            : true,
-        )
-        .filter(m => {
-          if (filter.count > 0) {
-            const totalJoined = m.participants
-              .map(p => p.count)
-              .reduce((sum, a) => sum + a, 0);
+        return true;
+      })
+      .filter(m =>
+        filter.date
+          ? isSameDay(startOfDay(new Date(m.start)), new Date(filter.date))
+          : true,
+      )
+      .filter(m => {
+        if (filter.count > 0) {
+          const totalJoined = m.participants
+            .map(p => p.count)
+            .reduce((sum, a) => sum + a, 0);
 
-            const remainingSlot = m.count - totalJoined;
-            return remainingSlot >= filter.count;
-          }
+          const remainingSlot = m.count - totalJoined;
+          return remainingSlot >= filter.count;
+        }
 
-          return true;
-        })
-    );
+        return true;
+      });
   }, [user?.match, matches, search, filter.date, filter.count]);
 
   function onSubmitFilter(f) {

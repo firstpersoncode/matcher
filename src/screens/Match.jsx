@@ -21,18 +21,25 @@ import MatchInfo from 'src/components/MatchInfo';
 import MatchParticipant from 'src/components/MatchParticipant';
 import MatchChat from 'src/components/MatchChat';
 import {useSheetContext} from 'src/context/Sheet';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
 const Tab = createMaterialTopTabNavigator();
 
 export default function Match() {
-  const {user, match, messages} = useAppContext();
+  const {user, match, messages, messagesLastRead} = useAppContext();
   const {displaySheet} = useSheetContext();
   const theme = useTheme();
   const navigation = useNavigation();
+  const [unreadCounts, setUnreadCounts] = useState(0);
 
   const isOwner = useMemo(
     () => String(match?.owner._id) === String(user?._id),
     [user?._id, match?.owner._id],
+  );
+
+  const isParticipant = useMemo(
+    () => String(match?._id) === String(user?.match?._id),
+    [user?.match?._id, match?._id],
   );
 
   const joinedCount = useMemo(
@@ -44,6 +51,21 @@ export default function Match() {
   useEffect(() => {
     if (!match?._id) navigation.navigate('MatchList');
   }, [match?._id]);
+
+  useEffect(() => {
+    if (!(isParticipant && messages.length)) return;
+    (async () => {
+      let lastRead =
+        messagesLastRead || (await AsyncStorage.getItem('messages-last-read'));
+      if (lastRead) {
+        let index = messages.findIndex(m => String(m._id) === String(lastRead));
+        if (index !== -1) {
+          let counts = messages.slice(index + 1).length;
+          setUnreadCounts(counts);
+        }
+      } else setUnreadCounts(messages.length);
+    })();
+  }, [isParticipant, messages, messagesLastRead]);
 
   function onEditName() {
     displaySheet({content: <EditName />});
@@ -134,11 +156,11 @@ export default function Match() {
             tabBarShowLabel: false,
             tabBarIcon: ({color}) => (
               <View style={{position: 'relative'}}>
-                {messages.length > 0 && (
+                {unreadCounts > 0 && (
                   <Badge
                     style={{position: 'absolute', top: -8, right: -8}}
                     size={17}>
-                    {messages.length}
+                    {unreadCounts}
                   </Badge>
                 )}
                 <Avatar.Icon

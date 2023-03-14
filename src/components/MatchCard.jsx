@@ -1,4 +1,4 @@
-import {useMemo} from 'react';
+import {useEffect, useMemo, useState} from 'react';
 import {View} from 'react-native';
 import {
   Card,
@@ -12,10 +12,12 @@ import {
 import {format} from 'date-fns';
 
 import {useAppContext} from 'src/context/App';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
 export default function MatchCard({mini = false, match, onPress, onPressMap}) {
-  const {user, messages} = useAppContext();
+  const {user, messages, messagesLastRead} = useAppContext();
   const theme = useTheme();
+  const [unreadCounts, setUnreadCounts] = useState(0);
 
   const isParticipant = useMemo(
     () => String(match._id) === String(user?.match?._id),
@@ -26,6 +28,21 @@ export default function MatchCard({mini = false, match, onPress, onPressMap}) {
     () => match.participants.map(p => p.count).reduce((sum, a) => sum + a, 0),
     [match.participants],
   );
+
+  useEffect(() => {
+    if (!(isParticipant && messages.length)) return;
+    (async () => {
+      let lastRead =
+        messagesLastRead || (await AsyncStorage.getItem('messages-last-read'));
+      if (lastRead) {
+        let index = messages.findIndex(m => String(m._id) === String(lastRead));
+        if (index !== -1) {
+          let counts = messages.slice(index + 1).length;
+          setUnreadCounts(counts);
+        }
+      } else setUnreadCounts(messages.length);
+    })();
+  }, [isParticipant, messages, messagesLastRead]);
 
   return (
     <Card
@@ -38,10 +55,10 @@ export default function MatchCard({mini = false, match, onPress, onPressMap}) {
       }}>
       <TouchableRipple onPress={onPress}>
         <Card.Content style={{position: 'relative', padding: 16}}>
-          {messages.length > 0 && (
+          {unreadCounts > 0 && (
             <Badge
               style={{position: 'absolute', top: -8, right: -8, zIndex: 1}}>
-              {messages.length}
+              {unreadCounts}
             </Badge>
           )}
           <View

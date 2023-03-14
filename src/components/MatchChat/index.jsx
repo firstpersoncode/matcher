@@ -1,4 +1,6 @@
-import {useMemo, useState} from 'react';
+import AsyncStorage from '@react-native-async-storage/async-storage';
+import {useFocusEffect} from '@react-navigation/native';
+import {useCallback, useEffect, useMemo, useRef, useState} from 'react';
 import {View, FlatList} from 'react-native';
 import {IconButton, Text, TextInput, useTheme} from 'react-native-paper';
 
@@ -7,7 +9,8 @@ import {useAppContext} from 'src/context/App';
 import Message from './Message';
 
 export default function MatchChat() {
-  const {user, match, messages, sendMessage} = useAppContext();
+  const {user, match, messages, sendMessage, setMessagesLastRead} =
+    useAppContext();
   const theme = useTheme();
   const [message, setMessage] = useState('');
   const [isSending, setIsSending] = useState(false);
@@ -15,6 +18,16 @@ export default function MatchChat() {
   const isParticipant = useMemo(
     () => user?.match && String(match?._id) === String(user.match._id),
     [user?.match, match?._id],
+  );
+
+  useFocusEffect(
+    useCallback(() => {
+      let lastMessage = messages[messages.length - 1];
+      if (lastMessage) {
+        AsyncStorage.setItem('messages-last-read', lastMessage._id);
+        setMessagesLastRead(lastMessage._id);
+      }
+    }, [messages]),
   );
 
   function onTypingMessage(text) {

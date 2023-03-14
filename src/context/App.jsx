@@ -54,6 +54,7 @@ const appContext = {
   matches: [],
   providers: [],
   messages: [],
+  messagesLastRead: null,
   inbox: null,
   privateMessages: [],
 };
@@ -571,6 +572,10 @@ function useAppState() {
     await rejectInvitation(matchRef);
   }
 
+  function setMessagesLastRead(id) {
+    setContext(v => ({...v, messagesLastRead: id}));
+  }
+
   async function loadMessages() {
     const messages = await fetchMessages();
     setContext(v => ({...v, messages}));
@@ -673,6 +678,7 @@ function useAppState() {
     handleRemoveParticipant,
     handleInviteParticipant,
     handleRejectInvite,
+    setMessagesLastRead,
     sendMessage,
     sendAnnouncement,
     announceMessage,
