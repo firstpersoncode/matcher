@@ -99,23 +99,24 @@ export default function Account() {
               onPress={toggleVisibleMenu}
             />
 
-            {(waitingRequest.length > 0 ||
-              privateMessages.length > 0 ||
-              waitingInvitations.length > 0) && (
-              <View
-                style={{
-                  position: 'absolute',
-                  top: 0,
-                  right: 0,
-                  height: 10,
-                  width: 10,
-                  backgroundColor: theme.colors.error,
-                  borderRadius: 50,
-                }}
-              />
-            )}
+            {user &&
+              (waitingRequest.length > 0 ||
+                privateMessages.length > 0 ||
+                waitingInvitations.length > 0) && (
+                <View
+                  style={{
+                    position: 'absolute',
+                    top: 0,
+                    right: 0,
+                    height: 10,
+                    width: 10,
+                    backgroundColor: theme.colors.error,
+                    borderRadius: 50,
+                  }}
+                />
+              )}
 
-            {displayNotif && (
+            {user && displayNotif && (
               <Pressable
                 onPress={onPressNotif}
                 style={{
