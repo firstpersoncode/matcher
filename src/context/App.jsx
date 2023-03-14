@@ -57,6 +57,7 @@ const appContext = {
   messagesLastRead: [],
   inbox: null,
   privateMessages: [],
+  privateMessagesLastRead: [],
 };
 
 function useAppState() {
@@ -664,6 +665,27 @@ function useAppState() {
     await confirmContact(contact);
   }
 
+  function setPrivateMessagesLastRead(inbox, message) {
+    setContext(v => {
+      let currMessagesLastRead = v.privateMessagesLastRead;
+      let lastRead = currMessagesLastRead.find(
+        m => String(m.inbox) === String(inbox),
+      );
+
+      if (lastRead) {
+        currMessagesLastRead = currMessagesLastRead.map(m => {
+          if (String(m.inbox) === String(inbox)) m.message = message;
+          return m;
+        });
+      } else currMessagesLastRead = [...currMessagesLastRead, {inbox, message}];
+
+      return {
+        ...v,
+        privateMessagesLastRead: currMessagesLastRead,
+      };
+    });
+  }
+
   async function loadPrivateMessages() {
     const privateMessages = await fetchPrivateMessages();
     setContext(v => ({...v, privateMessages}));
@@ -704,6 +726,7 @@ function useAppState() {
     getContact,
     addContact,
     acceptContact,
+    setPrivateMessagesLastRead,
     sendPrivateMessage,
   };
 }

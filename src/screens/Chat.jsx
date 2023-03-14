@@ -1,4 +1,4 @@
-import {useMemo, useState} from 'react';
+import {useEffect, useMemo, useState} from 'react';
 import {View, FlatList} from 'react-native';
 import {
   Divider,
@@ -12,9 +12,16 @@ import {useAppContext} from 'src/context/App';
 
 import Header from 'src/components/Header';
 import Message from 'src/components/Message';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
 export default function Chat() {
-  const {user, inbox, privateMessages, sendPrivateMessage} = useAppContext();
+  const {
+    user,
+    inbox,
+    privateMessages,
+    sendPrivateMessage,
+    setPrivateMessagesLastRead,
+  } = useAppContext();
   const theme = useTheme();
   const [message, setMessage] = useState('');
   const [isSending, setIsSending] = useState(false);
@@ -28,6 +35,39 @@ export default function Chat() {
       ),
     [privateMessages, inbox._id],
   );
+
+  useEffect(() => {
+    let lastMessage =
+      filteredPrivateMessages[filteredPrivateMessages.length - 1];
+    if (lastMessage) {
+      AsyncStorage.getItem('private-messages-last-read').then(res => {
+        let currMessagesLastRead = res ? JSON.parse(res) : [];
+
+        let lastRead = currMessagesLastRead.find(
+          m => String(m.inbox) === String(inbox._id),
+        );
+
+        if (lastRead) {
+          currMessagesLastRead = currMessagesLastRead.map(m => {
+            if (String(m.inbox) === String(inbox._id))
+              m.message = lastMessage._id;
+            return m;
+          });
+        } else
+          currMessagesLastRead = [
+            ...currMessagesLastRead,
+            {inbox: inbox._id, message: lastMessage._id},
+          ];
+
+        AsyncStorage.setItem(
+          'private-messages-last-read',
+          JSON.stringify(currMessagesLastRead),
+        );
+      });
+
+      setPrivateMessagesLastRead(inbox._id, lastMessage._id);
+    }
+  }, [inbox, filteredPrivateMessages]);
 
   function onTypingMessage(text) {
     setMessage(text);

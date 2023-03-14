@@ -1,3 +1,4 @@
+import AsyncStorage from '@react-native-async-storage/async-storage';
 import {useNavigation} from '@react-navigation/native';
 import {useEffect, useMemo, useRef, useState} from 'react';
 import {Pressable, View} from 'react-native';
@@ -19,13 +20,15 @@ import {useModalContext} from 'src/context/Modal';
 import Auth from './Auth';
 
 export default function Account() {
-  const {user, handleSignOut, privateMessages} = useAppContext();
+  const {user, handleSignOut, privateMessages, privateMessagesLastRead} =
+    useAppContext();
   const navigation = useNavigation();
   const theme = useTheme();
   const {displayModal} = useModalContext();
   const [visibleMenu, setVisibleMenu] = useState(false);
   const [displayNotif, setDisplayNotif] = useState(false);
   const timeoutRef = useRef();
+  const [unreadCounts, setUnreadCounts] = useState(0);
 
   const waitingRequest = useMemo(
     () => user?.contacts.filter(c => c.status === 'waiting-req') || [],
@@ -38,18 +41,54 @@ export default function Account() {
   );
 
   useEffect(() => {
-    if (
-      waitingRequest.length ||
-      privateMessages.length ||
-      waitingInvitations.length
-    ) {
+    if (!(user?.contacts.length && privateMessages.length)) return;
+    (async () => {
+      let counts = 0;
+
+      for (let item of user.contacts.filter(i => i.status === 'friend')) {
+        let messageLastRead = privateMessagesLastRead.find(
+          m => String(m.inbox) === String(item.contact._id),
+        );
+
+        if (!messageLastRead) {
+          let res = await AsyncStorage.getItem('private-messages-last-read');
+          let currMessagesLastRead = res ? JSON.parse(res) : [];
+          messageLastRead = currMessagesLastRead.find(
+            m => String(m.inbox) === String(item.contact._id),
+          );
+        }
+
+        let lastRead = messageLastRead?.message;
+        let messages = privateMessages.filter(
+          m =>
+            String(m.owner._id) === String(item.contact._id) ||
+            String(m.recipient._id) === String(item.contact._id),
+        );
+
+        if (lastRead) {
+          let index = messages.findIndex(
+            m => String(m._id) === String(lastRead),
+          );
+          if (index !== -1) {
+            let mcounts = messages.slice(index + 1).length;
+            counts += mcounts;
+          }
+        } else counts += messages.length;
+      }
+
+      setUnreadCounts(counts);
+    })();
+  }, [privateMessages, privateMessagesLastRead, user?.contacts]);
+
+  useEffect(() => {
+    if (waitingRequest.length || unreadCounts || waitingInvitations.length) {
       setDisplayNotif(true);
       if (timeoutRef.current) clearTimeout(timeoutRef.current);
       timeoutRef.current = setTimeout(() => {
         setDisplayNotif(false);
       }, 5000);
     }
-  }, [waitingRequest, privateMessages, waitingInvitations]);
+  }, [waitingRequest, unreadCounts, waitingInvitations]);
 
   function toggleVisibleMenu() {
     setVisibleMenu(v => !v);
@@ -101,7 +140,7 @@ export default function Account() {
 
             {user &&
               (waitingRequest.length > 0 ||
-                privateMessages.length > 0 ||
+                unreadCounts > 0 ||
                 waitingInvitations.length > 0) && (
                 <View
                   style={{
@@ -136,12 +175,12 @@ export default function Account() {
                     {waitingRequest.length}
                   </Button>
                 )}
-                {privateMessages.length > 0 && (
+                {unreadCounts > 0 && (
                   <Button
                     textColor="#FFF"
                     labelStyle={{fontSize: 12}}
                     icon="chat">
-                    {privateMessages.length}
+                    {unreadCounts}
                   </Button>
                 )}
                 {waitingInvitations.length > 0 && (
@@ -161,7 +200,23 @@ export default function Account() {
             <Menu.Item
               leadingIcon="account"
               onPress={onPressAccount}
-              title="Account"
+              title={
+                <View style={{flexDirection: 'row'}}>
+                  <Text style={{marginRight: 8}}>Account</Text>
+                  {(waitingRequest.length > 0 ||
+                    unreadCounts > 0 ||
+                    waitingInvitations.length > 0) && (
+                    <View
+                      style={{
+                        height: 10,
+                        width: 10,
+                        backgroundColor: theme.colors.error,
+                        borderRadius: 50,
+                      }}
+                    />
+                  )}
+                </View>
+              }
             />
             <Menu.Item
               leadingIcon="logout"

@@ -2,14 +2,22 @@ import {Pressable} from 'react-native';
 import {Badge, Menu, Text, useTheme} from 'react-native-paper';
 
 import {useAppContext} from 'src/context/App';
-import {useMemo, useState} from 'react';
+import {useEffect, useMemo, useState} from 'react';
 import {useNavigation} from '@react-navigation/native';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
 export default function Item({item}) {
-  const {user, matches, selectInbox, handleInviteParticipant} = useAppContext();
+  const {
+    user,
+    matches,
+    privateMessagesLastRead,
+    selectInbox,
+    handleInviteParticipant,
+  } = useAppContext();
   const navigation = useNavigation();
   const theme = useTheme();
   const [visibleMenu, setVisibleMenu] = useState(false);
+  const [unreadCounts, setUnreadCounts] = useState(0);
 
   const isParticipant = useMemo(
     () =>
@@ -20,6 +28,34 @@ export default function Item({item}) {
       ),
     [matches],
   );
+
+  useEffect(() => {
+    if (!item.messages.length) return;
+    (async () => {
+      let messageLastRead = privateMessagesLastRead.find(
+        m => String(m.inbox) === String(item.contact._id),
+      );
+
+      if (!messageLastRead) {
+        let res = await AsyncStorage.getItem('private-messages-last-read');
+        let currMessagesLastRead = res ? JSON.parse(res) : [];
+        messageLastRead = currMessagesLastRead.find(
+          m => String(m.inbox) === String(item.contact._id),
+        );
+      }
+
+      let lastRead = messageLastRead?.message;
+      if (lastRead) {
+        let index = item.messages.findIndex(
+          m => String(m._id) === String(lastRead),
+        );
+        if (index !== -1) {
+          let counts = item.messages.slice(index + 1).length;
+          setUnreadCounts(counts);
+        }
+      } else setUnreadCounts(item.messages.length);
+    })();
+  }, [item.messages, privateMessagesLastRead, item.contact._id]);
 
   function onPressMessage(inbox) {
     return function () {
@@ -67,14 +103,14 @@ export default function Item({item}) {
                 source={require('../assets/avatar.png')}
               /> */}
           <Text>{item.contact.name}</Text>
-          {item.messages.length > 0 && (
+          {unreadCounts > 0 && (
             <Badge
               style={{
                 position: 'absolute',
                 right: 8,
                 top: -8,
               }}>
-              {item.messages.length}
+              {unreadCounts}
             </Badge>
           )}
         </Pressable>

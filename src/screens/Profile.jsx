@@ -19,6 +19,7 @@ import Cog from 'src/components/Cog';
 import Contact from 'src/components/Contact';
 import ContactRequest from 'src/components/ContactRequest';
 import MatchInvitations from 'src/components/MatchInvitations';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
 const icons = {
   friend: 'contacts',
@@ -33,10 +34,11 @@ const renderScene = SceneMap({
 });
 
 export default function Profile() {
-  const {user, privateMessages} = useAppContext();
+  const {user, privateMessages, privateMessagesLastRead} = useAppContext();
   const {displaySheet} = useSheetContext();
   const theme = useTheme();
   const layout = useWindowDimensions();
+  const [unreadCounts, setUnreadCounts] = useState(0);
   const [index, setIndex] = useState(0);
   const [routes] = useState([
     {key: 'friend', title: 'Contacts'},
@@ -53,6 +55,46 @@ export default function Profile() {
     () => user?.invitations || [],
     [user?.invitations],
   );
+
+  useEffect(() => {
+    if (!(user?.contacts.length && privateMessages.length)) return;
+    (async () => {
+      let counts = 0;
+
+      for (let item of user.contacts.filter(i => i.status === 'friend')) {
+        let messageLastRead = privateMessagesLastRead.find(
+          m => String(m.inbox) === String(item.contact._id),
+        );
+
+        if (!messageLastRead) {
+          let res = await AsyncStorage.getItem('private-messages-last-read');
+          let currMessagesLastRead = res ? JSON.parse(res) : [];
+          messageLastRead = currMessagesLastRead.find(
+            m => String(m.inbox) === String(item.contact._id),
+          );
+        }
+
+        let lastRead = messageLastRead?.message;
+        let messages = privateMessages.filter(
+          m =>
+            String(m.owner._id) === String(item.contact._id) ||
+            String(m.recipient._id) === String(item.contact._id),
+        );
+
+        if (lastRead) {
+          let index = messages.findIndex(
+            m => String(m._id) === String(lastRead),
+          );
+          if (index !== -1) {
+            let mcounts = messages.slice(index + 1).length;
+            counts += mcounts;
+          }
+        } else counts += messages.length;
+      }
+
+      setUnreadCounts(counts);
+    })();
+  }, [privateMessages, privateMessagesLastRead, user?.contacts]);
 
   function onEditName() {
     displaySheet({content: <EditName />});
@@ -115,11 +157,11 @@ export default function Profile() {
                   }}>
                   {route.title}
                 </Text>
-                {route.key === 'friend' && privateMessages.length > 0 && (
+                {route.key === 'friend' && unreadCounts > 0 && (
                   <Badge
                     size={17}
                     style={{position: 'absolute', top: -7, right: 0}}>
-                    {privateMessages.length}
+                    {unreadCounts}
                   </Badge>
                 )}
                 {route.key === 'friend-request' &&
