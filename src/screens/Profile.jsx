@@ -529,7 +529,14 @@ function ContactRequest() {
   const [visibleMenu, setVisibleMenu] = useState(false);
 
   const contacts = useMemo(
-    () => user?.contacts.filter(c => c.status !== 'friend') || [],
+    () =>
+      user?.contacts
+        .filter(c => c.status !== 'friend')
+        .sort((a, b) => {
+          if (a.status === 'waiting-req' || b.status === 'waiting-req')
+            return 1;
+          return -1;
+        }) || [],
     [user?.contacts],
   );
 
