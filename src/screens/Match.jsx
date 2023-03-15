@@ -116,7 +116,11 @@ export default function Match() {
         screenOptions={{
           swipeEnabled: false,
           lazy: true,
-          tabBarIndicatorStyle: {backgroundColor: 'transparent'},
+          tabBarIndicatorStyle: {
+            backgroundColor: theme.colors.primary,
+            bottom: 'auto',
+            top: 0,
+          },
           tabBarStyle: {backgroundColor: theme.colors.secondaryContainer},
           tabBarItemStyle: {
             flexDirection: 'row',
