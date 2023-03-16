@@ -81,6 +81,7 @@ export default function Contact() {
             borderWidth: 1,
             borderColor: theme.colors.secondary,
           }}
+          inputStyle={{fontSize: 12}}
           placeholder="Search..."
           value={search}
           onChangeText={handleChangeSearch}

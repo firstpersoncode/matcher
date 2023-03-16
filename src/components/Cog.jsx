@@ -28,7 +28,6 @@ export default function Cog() {
   }
 
   return (
-    
     <Menu
       visible={visibleMenu}
       onDismiss={toggleVisibleMenu}
@@ -39,10 +38,21 @@ export default function Cog() {
           onPress={toggleVisibleMenu}
         />
       }>
-      <Menu.Item leadingIcon="star" onPress={onPress} title="Rate Us!" />
-      <Menu.Item leadingIcon="email" onPress={onPress} title="Contact Us" />
+      <Menu.Item
+        titleStyle={{fontSize: 12}}
+        leadingIcon="star"
+        onPress={onPress}
+        title="Rate Us!"
+      />
+      <Menu.Item
+        titleStyle={{fontSize: 12}}
+        leadingIcon="email"
+        onPress={onPress}
+        title="Contact Us"
+      />
       <Divider />
       <Menu.Item
+        titleStyle={{fontSize: 12}}
         leadingIcon="logout"
         onPress={onPressSignOut}
         title="Sign Out"

@@ -139,6 +139,7 @@ export default function EditProvider() {
                 borderWidth: 1,
                 borderColor: theme.colors.secondary,
               }}
+              inputStyle={{fontSize: 12}}
               placeholder="Search..."
               value={search}
               onChangeText={handleChangeSearch}
@@ -195,7 +196,7 @@ function Filter({availability, onSubmit}) {
   }
 
   return (
-    <View style={{padding: 16,  backgroundColor: '#FFF'}}>
+    <View style={{padding: 16, backgroundColor: '#FFF'}}>
       {Object.keys(DAY_MAPS).map(a => (
         <Button
           mode="elevated"

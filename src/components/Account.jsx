@@ -202,7 +202,7 @@ export default function Account() {
               onPress={onPressAccount}
               title={
                 <View style={{flexDirection: 'row'}}>
-                  <Text style={{marginRight: 8}}>Account</Text>
+                  <Text style={{marginRight: 8, fontSize: 12}}>Account</Text>
                   {(waitingRequest.length > 0 ||
                     unreadCounts > 0 ||
                     waitingInvitations.length > 0) && (
@@ -219,6 +219,7 @@ export default function Account() {
               }
             />
             <Menu.Item
+              titleStyle={{fontSize: 12}}
               leadingIcon="logout"
               onPress={onPressSignOut}
               title="Sign Out"
@@ -226,6 +227,7 @@ export default function Account() {
           </>
         ) : (
           <Menu.Item
+            titleStyle={{fontSize: 12}}
             leadingIcon="login"
             onPress={onPressSignIn}
             title="Sign In"

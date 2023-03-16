@@ -72,7 +72,7 @@ export default function Add() {
   }
 
   return (
-    <View style={{padding: 16}}>
+    <View style={{padding: 16, paddingBottom: 32}}>
       <View
         style={{flexDirection: 'row', alignItems: 'center', marginBottom: 16}}>
         <Searchbar
@@ -87,6 +87,7 @@ export default function Add() {
             borderColor: theme.colors.secondary,
             marginRight: 16,
           }}
+          inputStyle={{fontSize: 12}}
           placeholder="User ID"
           value={idString}
           onChangeText={onChange}

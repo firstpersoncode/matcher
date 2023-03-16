@@ -56,6 +56,8 @@ export default function CalendarPicker({
                 style={{
                   textAlign: 'center',
                   color: selected ? theme.colors.onPrimary : 'black',
+                  fontSize: 10,
+                  lineHeight: 15,
                 }}>
                 {day}
               </Text>

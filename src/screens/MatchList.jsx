@@ -181,11 +181,14 @@ export default function MatchList() {
                 borderWidth: 1,
                 borderColor: theme.colors.secondary,
               }}
+              inputStyle={{fontSize: 12}}
               placeholder="Search..."
               value={search}
               onChangeText={handleChangeSearch}
             />
-            <HelperText>By name, provider, address, owner</HelperText>
+            <HelperText style={{fontSize: 12}}>
+              By name, provider, address, owner
+            </HelperText>
           </View>
         </View>
 

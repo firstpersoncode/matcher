@@ -35,21 +35,34 @@ export default function Counter({
           flexDirection: 'row',
           justifyContent: 'space-between',
         }}>
-        <Text variant="titleMedium">{label}</Text>
+        <Text style={{fontSize: 12}} variant="titleMedium">
+          {label}
+        </Text>
         <View style={{flexDirection: 'row'}}>
-          <IconButton mode="contained" icon="minus" onPress={handleDecrement} />
+          <IconButton
+            size={16}
+            mode="contained"
+            icon="minus"
+            onPress={handleDecrement}
+          />
           <View>
             <TextInput
               mode="outlined"
               editable={false}
               value={String(value)}
               error={Boolean(error)}
+              style={{fontSize: 12}}
             />
             <HelperText type="error" visible={Boolean(error)}>
               {error}
             </HelperText>
           </View>
-          <IconButton mode="contained" icon="plus" onPress={handleIncrement} />
+          <IconButton
+            size={16}
+            mode="contained"
+            icon="plus"
+            onPress={handleIncrement}
+          />
         </View>
       </View>
     </Card>

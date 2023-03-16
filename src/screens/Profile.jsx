@@ -154,6 +154,7 @@ export default function Profile() {
                   style={{
                     color: focused ? theme.colors.onBackground : '#aaa',
                     margin: 8,
+                    fontSize: 12,
                   }}>
                   {route.title}
                 </Text>
