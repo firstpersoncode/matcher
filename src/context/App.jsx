@@ -2,7 +2,21 @@ import {useState, createContext, useContext, useEffect, useMemo} from 'react';
 import Geolocation from '@react-native-community/geolocation';
 import io from 'socket.io-client';
 import Config from 'react-native-config';
-import PushNotification, {Importance} from 'react-native-push-notification';
+import messaging from '@react-native-firebase/messaging';
+
+async function requestFCMToken() {
+  const authStatus = await messaging().requestPermission();
+  const enabled =
+    authStatus === messaging.AuthorizationStatus.AUTHORIZED ||
+    authStatus === messaging.AuthorizationStatus.PROVISIONAL;
+
+  if (enabled) {
+    await messaging().registerDeviceForRemoteMessages();
+    const token = await messaging().getToken();
+
+    return token;
+  }
+}
 
 import {
   fetchUser,
@@ -42,7 +56,6 @@ import {
   requestContact,
 } from 'src/services/contact';
 
-const channelId = 'test-channel';
 let socketClient;
 
 const appContext = {
@@ -84,8 +97,6 @@ function useAppState() {
       Geolocation.requestAuthorization(init, err =>
         console.error('requestAuthorization', err.message || err),
       );
-
-      notificationInit();
 
       socketClient = io(Config.API_URI);
       socketClient.on('connect', socketInit);
@@ -153,38 +164,6 @@ function useAppState() {
       err => console.error('getCurrentPosition', err.message || err),
       {enableHighAccuracy: true},
     );
-  }
-
-  function notificationInit() {
-    PushNotification.channelExists(channelId, function (exists) {
-      if (!exists) {
-        PushNotification.createChannel(
-          {
-            channelId, // (required)
-            channelName: 'My channel', // (required)
-            // channelDescription: 'A channel to categorise your notifications', // (optional) default: undefined.
-            playSound: true, // (optional) default: true
-            soundName: 'default', // (optional) See `soundName` parameter of `localNotification` function
-            importance: Importance.HIGH, // (optional) default: Importance.HIGH. Int value of the Android notification importance
-            vibrate: true, // (optional) default: true. Creates the default vibration pattern if true.
-          },
-          created => {
-            // if (created)
-            //   PushNotification.localNotification({
-            //     channelId,
-            //     title: 'Welcome back!', // (optional)
-            //     message: 'Where have you been!?', // (required)
-            //   });
-          },
-        );
-      }
-      // else
-      //   PushNotification.localNotification({
-      //     channelId,
-      //     title: 'Welcome back!', // (optional)
-      //     message: 'Where have you been!?', // (required)
-      //   });
-    });
   }
 
   function socketInit() {
@@ -502,12 +481,14 @@ function useAppState() {
   }
 
   async function handleSignIn(form) {
-    const user = await signIn(form);
+    const token = await requestFCMToken();
+    const user = await signIn({...form, fcmToken: token});
     setContext(v => ({...v, user}));
   }
 
   async function handleSignUp(form) {
-    const user = await signUp(form);
+    const token = await requestFCMToken();
+    const user = await signUp({...form, fcmToken: token});
     setContext(v => ({...v, user}));
   }
 
