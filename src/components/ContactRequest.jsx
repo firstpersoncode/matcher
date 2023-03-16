@@ -5,9 +5,7 @@ import {useAppContext} from 'src/context/App';
 import {useMemo, useState} from 'react';
 
 export default function ContactRequest() {
-  const {user, acceptContact} = useAppContext();
-  const theme = useTheme();
-  const [visibleMenu, setVisibleMenu] = useState(false);
+  const {user} = useAppContext();
 
   const contacts = useMemo(
     () =>
@@ -20,6 +18,20 @@ export default function ContactRequest() {
         }) || [],
     [user?.contacts],
   );
+
+  return (
+    <FlatList
+      data={contacts}
+      renderItem={({item}) => <Item item={item} />}
+      keyExtractor={item => item.contact._id}
+    />
+  );
+}
+
+function Item({item}) {
+  const {acceptContact} = useAppContext();
+  const theme = useTheme();
+  const [visibleMenu, setVisibleMenu] = useState(false);
 
   function toggleVisibleMenu() {
     setVisibleMenu(v => !v);
@@ -37,39 +49,33 @@ export default function ContactRequest() {
   }
 
   return (
-    <FlatList
-      data={contacts}
-      renderItem={({item}) => (
-        <Menu
-          visible={visibleMenu}
-          onDismiss={toggleVisibleMenu}
-          anchor={
-            <Pressable
-              onPress={
-                item.status === 'waiting-req' ? toggleVisibleMenu : undefined
-              }
-              style={{
-                flexDirection: 'row',
-                alignItems: 'center',
-                padding: 16,
-                marginHorizontal: 16,
-                marginVertical: 8,
-                backgroundColor: theme.colors.secondaryContainer,
-                borderRadius: 10,
-                opacity: item.status === 'waiting-req' ? 1 : 0.3,
-              }}>
-              {/* <Image
+    <Menu
+      visible={visibleMenu}
+      onDismiss={toggleVisibleMenu}
+      anchor={
+        <Pressable
+          onPress={
+            item.status === 'waiting-req' ? toggleVisibleMenu : undefined
+          }
+          style={{
+            flexDirection: 'row',
+            alignItems: 'center',
+            padding: 16,
+            marginHorizontal: 16,
+            marginVertical: 8,
+            backgroundColor: theme.colors.secondaryContainer,
+            borderRadius: 10,
+            opacity: item.status === 'waiting-req' ? 1 : 0.3,
+          }}>
+          {/* <Image
                 resizeMode="stretch"
                 style={{width: 30, height: 30, marginRight: 16}}
                 source={require('../assets/avatar.png')}
               /> */}
-              <Text>{item.contact.name}</Text>
-            </Pressable>
-          }>
-          <Menu.Item title="Accept Contact" onPress={onAccept(item.contact)} />
-        </Menu>
-      )}
-      keyExtractor={item => item.contact._id}
-    />
+          <Text>{item.contact.name}</Text>
+        </Pressable>
+      }>
+      <Menu.Item title="Accept Contact" onPress={onAccept(item.contact)} />
+    </Menu>
   );
 }
